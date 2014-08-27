@@ -1,0 +1,64 @@
+﻿<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.OutputInit" %>
+<%@ Import Namespace="CrownPeak.CMSAPI" %>
+<%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
+<%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
+<!--DO NOT MODIFY CODE ABOVE THIS LINE-->
+<%//This plugin uses OutputContext as its context class type%>
+<%
+
+	var paths = new string[] { "/System/Library", "/System/Templates" };
+
+	Out.Write("curDir={0}",AppDomain.CurrentDomain.BaseDirectory);
+
+	var files = System
+		.IO
+		.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory);
+	
+	Out.Write("<codeLibrary>\n");
+
+	System.Text.StringBuilder sb = new StringBuilder();
+	foreach (string file in files)
+	{
+		WriteFileNode(file, sb);
+		break;
+	}
+	Out.Write(sb.ToString());
+	
+	foreach (string basepath in paths)
+	{
+		
+		
+		//Asset folder = Asset.Load(basepath);
+		
+		//List<Asset> filesInFolder = folder.GetFileList();
+		
+
+		//List<Asset> foldersInFolder = folder.GetFolderList();
+
+	}
+
+	Out.Write("</codeLibrary>");
+	
+%>
+
+<script runat="server" data-cpcode="true">
+
+	void WriteFiles(Asset folder)
+	{
+
+	}
+	static void WriteFileNode(string path, System.Text.StringBuilder sb)
+	{
+		sb.AppendFormat("<codeFile name=\"{0}\">", path);
+
+		var fs = System
+		.IO
+		.File.OpenRead(path);
+		byte[] bytes = new byte[fs.Length];
+		int bytesRead = fs.Read(bytes, 0, (int)fs.Length);
+		sb.Append(Convert.ToBase64String(bytes, 0, bytes.Length));
+
+		sb.AppendLine("\n\t</codeFile>\n");
+	}
+
+</script>
