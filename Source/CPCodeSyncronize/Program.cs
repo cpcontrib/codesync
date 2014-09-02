@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace ConsoleApplication1
 {
@@ -20,6 +21,8 @@ namespace ConsoleApplication1
 		}
 		static void Main(string[] args)
 		{
+			
+
 			string filename;
 			string basepath = SafeArgs(args,1);
 			if(string.IsNullOrEmpty(basepath)) basepath = ".\\";
@@ -109,7 +112,7 @@ namespace ConsoleApplication1
 			
 			while (index < segmentsLengthMinusOne)
 			{
-				string directorypath = basepath + String.Join("\\", segments.Take(index + 1));
+				string directorypath = Path.Combine(basepath, String.Join("\\", segments.Take(index + 1)));
 				index++;
 
 				try
