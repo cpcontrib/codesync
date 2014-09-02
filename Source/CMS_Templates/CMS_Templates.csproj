@@ -57,6 +57,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CodeSync\input.aspx" />
     <Content Include="CodeSync\post_save.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
