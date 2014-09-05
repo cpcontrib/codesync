@@ -43,18 +43,35 @@ namespace ConsoleApplication1
 				filename = args[0];
 			}
 
-
-			XDocument xdoc;
-			using (var filestream = File.OpenRead(filename))
-			{
-				xdoc = XDocument.Load(filestream);
-			}
-
+			XDocument xdoc = LoadFromFile(filename);
 
 			foreach (var filenode in xdoc.Element("codeLibrary").Elements("codeFile"))
 			{
 				WriteFile(filenode, basepath);
 			}
+		}
+
+		static XDocument LoadFromFile(string filename)
+		{
+			XDocument xdoc;
+			Stream s = null;
+			try
+			{
+				s = File.OpenRead(filename);
+
+				if(filename.EndsWith(".gz"))
+				{
+					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
+				}
+
+				xdoc = System.Xml.Linq.XDocument.Load(s, LoadOptions.None);
+			}
+			finally
+			{
+				if(s!=null) s.Dispose();
+			}
+
+			return xdoc;
 		}
 
 		static void WriteFile(XElement node, string basepath)
