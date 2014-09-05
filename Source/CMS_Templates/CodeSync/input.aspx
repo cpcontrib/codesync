@@ -9,4 +9,9 @@
 
 	Input.ShowTextBox("Email to", "mail_to");
 
+	Input.ShowTextBox("Modified Since:", "modified_since", helpMessage:"clear this to rebuild all");
+	
+	if (string.IsNullOrEmpty(asset["log"]) == false)
+		Input.ShowTextBox("Log", "log", readOnly: true);
+
 %>
