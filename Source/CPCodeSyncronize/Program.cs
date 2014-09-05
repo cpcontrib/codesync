@@ -44,8 +44,9 @@ namespace ConsoleApplication1
 			}
 
 			XDocument xdoc = LoadFromFile(filename);
+			IEnumerable<XElement> codeFileElements = xdoc.Element("codeLibrary").Elements("codeFile");
 
-			foreach (var filenode in xdoc.Element("codeLibrary").Elements("codeFile"))
+			foreach (var filenode in codeFileElements)
 			{
 				WriteFile(filenode, basepath);
 			}
