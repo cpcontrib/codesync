@@ -43,8 +43,7 @@ namespace ConsoleApplication1
 				filename = args[0];
 			}
 
-			XDocument xdoc = LoadFromFile(filename);
-			IEnumerable<XElement> codeFileElements = xdoc.Element("codeLibrary").Elements("codeFile");
+			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
 			foreach (var filenode in codeFileElements)
 			{
@@ -52,9 +51,8 @@ namespace ConsoleApplication1
 			}
 		}
 
-		static XDocument LoadFromFile(string filename)
+		static IEnumerable<XElement> LoadFromFile(string filename)
 		{
-			XDocument xdoc;
 			Stream s = null;
 			try
 			{
@@ -65,14 +63,37 @@ namespace ConsoleApplication1
 					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
 				}
 
-				xdoc = System.Xml.Linq.XDocument.Load(s, LoadOptions.None);
+				return StreamCodeFileElements(s);
 			}
 			finally
 			{
-				if(s!=null) s.Dispose();
+				
 			}
+		}
 
-			return xdoc;
+		static IEnumerable<XElement> StreamCodeFileElements(Stream source)
+		{
+			using (XmlReader reader = XmlReader.Create(source))
+			{
+				XElement item = null;
+
+				reader.MoveToContent();
+
+				// Parse the file, save header information when encountered, and yield the
+				// Item XElement objects as they are created.
+
+				// loop through codeFile elements
+				while (reader.Read())
+				{
+					if (reader.NodeType == XmlNodeType.Element
+						&& reader.Name == "codeFile")
+					{
+						item = XElement.ReadFrom(reader) as XElement;
+
+						if (item != null) yield return item;
+					}
+				}
+			}
 		}
 
 		static void WriteFile(XElement node, string basepath)
