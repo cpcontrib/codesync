@@ -3,8 +3,16 @@
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
-<%//This plugin uses PostSaveContext as its context class type
+<% 
+	Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
+	
+	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
+	try { this.ModifiedSince = DateTime.Parse(asset.Raw["modified_since"]); } 
+	catch { this.ModifiedSince = null; }
+
+	DateTime beganRunning = DateTime.UtcNow;
+  
 	try { 
 		System. IO.MemoryStream ms=new System. IO.MemoryStream(); 
 		using(System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
@@ -49,7 +57,8 @@
 				Out.DebugWriteLine("Failed to send mail: " + ex.ToString());
 				throw new ApplicationException("Failed to send mail.", ex);				
 			}
-		
+
+			asset.DeleteContentField("log");
 		}
 	}
 	catch (Exception ex)
@@ -73,10 +82,15 @@
 	{
 		Out.DebugWriteLine("clearing mail_to field.");
 		asset.SaveContentField("mail_to", null);
+		asset.SaveContentField("modified_since", beganRunning.ToString("O"));
 	}
 %>
 
 <script runat="server" data-cpcode="true">
+	Logger Log = LogManager.GetCurrentClassLogger(); 
+	
+	DateTime? ModifiedSince;
+	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	string[] Paths = new string[] { "/System/Library", "/System/Templates" };
 	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral",
 						  "/System/Templates/SimpleSiteCSharp",
@@ -89,18 +103,25 @@
 	{
 		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase)) 
 		{ 
-			Out.DebugWriteLine("skipping '{0}'", folder.AssetPath);
+			Log.InfoFormat("assetpath '{0}' contained in PathsIgnore.  skipping.", folder.AssetPath);
 			return;
 		}
 		else
 		{
-			Out.DebugWriteLine("listing contents of folder '{0}'", folder.AssetPath);
+			Log.InfoFormat("listing contents of folder '{0}'", folder.AssetPath);
 		}
 		
 		List<Asset> assetsInFolder = folder.GetFileList();
 		foreach (var asset1 in assetsInFolder)
 		{
-			WriteFileNode(asset1, sb);
+			if (asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
+			{
+				WriteFileNode(asset1, sb);
+			}
+			else
+			{
+				if(Log.IsDebugEnabled) Log.DebugFormat("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
+			}
 		}
 
 		if(deep)
@@ -111,11 +132,22 @@
 			}
 		}
 	}
-	static void WriteFileNode(Asset asset, System. IO. TextWriter sb)
+	void WriteFileNode(Asset asset, System. IO. TextWriter sb)
 	{
-		Out.DebugWriteLine("writing {0}", asset.AssetPath);
+		Log.InfoFormat("writing {0}", asset.AssetPath);
+		User modifiedBy;
+		if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
+		{
+			modifiedBy = CrownPeak.CMSAPI.User.Load(asset.ModifiedUserId);
+			usersDictionary[asset.ModifiedUserId] = modifiedBy;
+		}
+		else
+		{
+			modifiedBy = usersDictionary[asset.ModifiedUserId];
+		}
+		string modifiedByUserStr = string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email);
 		
-		sb.Write("<codeFile name=\"{0}\">", asset.AssetPath);
+		sb.Write("<codeFile name=\"{0}\" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
 
 		//System
 		//    .IO
