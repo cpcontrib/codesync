@@ -70,18 +70,6 @@
 	{
 			Out.DebugWriteLine("Exception occurred: " + ex.ToString());
 			asset.SaveContentField("log", ex.ToString());
-
-			string filename = Regex.Match(ex.ToString(), @"in ([a-z]:\\[^:]*)", RegexOptions.IgnoreCase).Groups[1].Value;
-
-		try
-		{
-			System. Net.Mail.MailMessage msg = new System. Net.Mail.MailMessage(context.ClientName + "@cms.crownpeak.com", asset["mail_to"]);
-			System. Net.Mail.SmtpClient client = new System. Net.Mail.SmtpClient("mail.evolvedhosts.net", 25);
-			client.Credentials = new System. Net.NetworkCredential("outgoing@evolvedhosts.net", "Letmein1!");
-			msg.Attachments.Add(CreateAttachmentFromText(System. IO.File.ReadAllText(filename), System. IO.Path.GetFileName(filename), "text/plain"));
-			client.Send(msg);
-		}
-		catch (Exception exInner) { Out.DebugWriteLine("exInner: {0}", exInner.ToString()); }
 	}
 	finally 
 	{
