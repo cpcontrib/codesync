@@ -13,27 +13,31 @@
 
 	DateTime beganRunning = DateTime.UtcNow;
   
-	try { 
-		System. IO.MemoryStream ms=new System. IO.MemoryStream(); 
-		using(System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
-		{
-			System. IO.StreamWriter sw = new System. IO.StreamWriter(gz, Encoding.UTF8);
+	try {
+        System. IO.MemoryStream ms = new System. IO.MemoryStream(); 
+        if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+        {
+		    using(System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
+		    {
+			    System. IO.StreamWriter sw = new System. IO.StreamWriter(gz, Encoding.UTF8);
 
-			sw.Write("<codeLibrary>\n");
+			    sw.Write("<codeLibrary>\n");
 
-			foreach (string basepath in Paths)
-			{
-				Asset folder = Asset.Load(basepath);
+			    foreach (string basepath in Paths)
+			    {
+				    Asset folder = Asset.Load(basepath);
 
-				WriteFolderAndChildren(folder, true, sw);
+				    WriteFolderAndChildren(folder, true, sw);
+			    }
+                //WriteFolderAndChildren(new System. IO.DirectoryInfo("C:\\Windows\\Temp"), sw);
+                WriteAssemblies(sw);
 
-			}
-
-			sw.Write("</codeLibrary>");
-			sw.Flush();
+			    sw.Write("</codeLibrary>");
+			    sw.Flush();
 		
-			gz.Flush();
-		}
+			    gz.Flush();
+		    }
+        }
 
 		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
 		{
@@ -49,6 +53,7 @@
 				System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient("mail.evolvedhosts.net", 25);
 				client.Credentials = new System.Net.NetworkCredential("outgoing@evolvedhosts.net", "Letmein1!");
 				client.Send(msg);
+                Out.WriteLine("msg sent.");
 
 				asset.DeleteContentField("mail_to");
 			}
