@@ -4,7 +4,7 @@
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
-	Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
+	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
 	
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
@@ -80,7 +80,7 @@
 %>
 
 <script runat="server" data-cpcode="true">
-	Logger Log = LogManager.GetCurrentClassLogger(); 
+//Logger Log = LogManager.GetCurrentClassLogger(); 
 	
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
@@ -96,12 +96,12 @@
 	{
 		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase)) 
 		{ 
-			Log.InfoFormat("assetpath '{0}' contained in PathsIgnore.  skipping.", folder.AssetPath);
+			Out.DebugWriteLine("assetpath '{0}' contained in PathsIgnore.  skipping.", folder.AssetPath);
 			return;
 		}
 		else
 		{
-			Log.InfoFormat("listing contents of folder '{0}'", folder.AssetPath);
+			Out.DebugWriteLine("listing contents of folder '{0}'", folder.AssetPath);
 		}
 		
 		List<Asset> assetsInFolder = folder.GetFileList();
@@ -113,7 +113,7 @@
 			}
 			else
 			{
-				if(Log.IsDebugEnabled) Log.DebugFormat("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
+				Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
 			}
 		}
 
@@ -127,7 +127,7 @@
 	}
 	void WriteFileNode(Asset asset, System. IO. TextWriter sb)
 	{
-		Log.InfoFormat("writing {0}", asset.AssetPath);
+		Out.DebugWriteLine("writing {0}", asset.AssetPath);
 		User modifiedBy;
 		if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
 		{
