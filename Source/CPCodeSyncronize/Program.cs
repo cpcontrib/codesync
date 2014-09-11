@@ -71,7 +71,7 @@ namespace ConsoleApplication1
 					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
 				}
 
-				return StreamCodeFileElements(s);
+				return StreamCodeFileElements(s, "codeFile");
 			}
 			finally
 			{
@@ -79,7 +79,7 @@ namespace ConsoleApplication1
 			}
 		}
 
-		static IEnumerable<XElement> StreamCodeFileElements(Stream source)
+		static IEnumerable<XElement> StreamCodeFileElements(Stream source, string elementName)
 		{
 			using (XmlReader reader = XmlReader.Create(source))
 			{
@@ -94,7 +94,7 @@ namespace ConsoleApplication1
 				while (reader.Read())
 				{
 					if (reader.NodeType == XmlNodeType.Element
-						&& reader.Name == "codeFile")
+						&& reader.Name == elementName)
 					{
 						item = XElement.ReadFrom(reader) as XElement;
 
