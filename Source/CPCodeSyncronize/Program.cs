@@ -28,6 +28,14 @@ namespace ConsoleApplication1
 			if(string.IsNullOrEmpty(basepath)) basepath = ".\\";
 
 			string fullUri = args[0];// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
+			if(Directory.Exists(basepath)==false)
+			{
+				Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", basepath);
+				var key = Console.ReadKey();
+				Console.WriteLine();
+				if (key.Key == ConsoleKey.Y)
+					Directory.CreateDirectory(basepath);
+			}
 
 			if (fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
 			{
