@@ -80,6 +80,8 @@ namespace ConsoleApplication1
 			}
 
 			sw.Stop();
+
+			if(Options.Verbose==false) Console.WriteLine();
 			Console.WriteLine("Completed in {0:0.00} secs", ((float)sw.ElapsedMilliseconds / (float)1000));
 
 			if(Debugger.IsAttached) Console.ReadKey();
@@ -164,10 +166,14 @@ namespace ConsoleApplication1
 
 				}
 
-				Console.WriteLine("Wrote file '{0}'.", fullpath);
+				if(Options.Verbose)
+					Console.WriteLine("Wrote file '{0}'.", fullpath);
+				else
+					Console.Write(".");
 			}
 			catch (Exception ex)
 			{
+				if(Options.Verbose==false) Console.WriteLine();
 				string nameAttrValue=""; try { nameAttrValue = node.Attribute("name").Value; } catch {}
 				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
 				Console.Error.WriteLine(node.ToString());
