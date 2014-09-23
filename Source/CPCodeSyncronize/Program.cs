@@ -12,13 +12,6 @@ namespace ConsoleApplication1
 {
 	class Program
 	{
-		static string SafeArgs(string[] args, int index, string defaultValue=null)
-		{
-			if (index > args.Length-1)
-				return defaultValue;
-			else
-				return args[index];
-		}
 
 		static Options Options;
 
@@ -36,17 +29,23 @@ namespace ConsoleApplication1
 			sw.Start();
 
 			string filename;
-			string basepath = SafeArgs(args,1);
-			if(string.IsNullOrEmpty(basepath)) basepath = ".\\";
 
 			string fullUri = args[0];// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
-			if(Directory.Exists(basepath)==false)
+			if (Options.OutputDir != null && Directory.Exists(Options.OutputDir) == false)
 			{
-				Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", basepath);
-				var key = Console.ReadKey();
-				Console.WriteLine();
-				if (key.Key == ConsoleKey.Y)
-					Directory.CreateDirectory(basepath);
+				if (Options.CreateDir != false) 
+				{
+					if (Options.CreateDir == null)
+					{ 
+						Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", Options.OutputDir);
+						var key = Console.ReadKey();
+						Console.WriteLine();
+						if (key.Key == ConsoleKey.Y) Options.CreateDir = true;
+					}
+
+					if (Options.CreateDir == true)
+						Directory.CreateDirectory(Options.OutputDir);
+				}
 			}
 
 			if (fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
@@ -54,6 +53,7 @@ namespace ConsoleApplication1
 				filename = fullUri.Substring(fullUri.LastIndexOf("/") + 1);
 				if (File.Exists(filename) == false)
 				{
+					
 					System.Net.WebClient wc = new System.Net.WebClient();
 					wc.DownloadFile(fullUri, filename);
 				}
@@ -67,7 +67,7 @@ namespace ConsoleApplication1
 
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(filenode, basepath);
+				WriteFile(filenode, Options.OutputDir);
 			}
 
 			sw.Stop();
