@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
+
 <%@ Import Namespace="CrownPeak.CMSAPI" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
@@ -10,37 +11,39 @@
 		Paths = asset.Raw["paths_include"].Split('\n').Select(_ => _.Trim()).ToArray();
 	if (string.IsNullOrEmpty(asset.Raw["paths_exclude"]) == false)
 		PathsIgnore = asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim()).ToArray();
-	
+
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
-	try { this.ModifiedSince = DateTime.Parse(asset.Raw["modified_since"]); } 
+	try { this.ModifiedSince = DateTime.Parse(asset.Raw["modified_since"]); }
 	catch { this.ModifiedSince = null; }
 
 	DateTime beganRunning = DateTime.UtcNow;
-  
-	try {
-        System. IO.MemoryStream ms = new System. IO.MemoryStream(); 
-        if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
-        {
-		    using(System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
-		    {
-			    System. IO.StreamWriter sw = new System. IO.StreamWriter(gz, Encoding.UTF8);
 
-			    sw.Write("<codeLibrary>\n");
+	try
+	{
+		System. IO.MemoryStream ms = new System. IO.MemoryStream();
+		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+		{
+			using (System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
+			{
+				System. IO.StreamWriter sw = new System. IO.StreamWriter(gz, Encoding.UTF8);
 
-			    foreach (string basepath in Paths)
-			    {
-				    Asset folder = Asset.Load(basepath);
+				sw.Write("<codeLibrary>\n");
 
-				    WriteFolderAndChildren(folder, true, sw);
-			    }
+				foreach (string basepath in Paths)
+				{
+					Out.DebugWriteLine("beginning with path: {0}", basepath);
+					Asset folder = Asset.Load(basepath);
 
-			    sw.Write("</codeLibrary>");
-			    sw.Flush();
-		
-			    gz.Flush();
-		    }
-        }
+					WriteFolderAndChildren(folder, true, sw);
+				}
+
+				sw.Write("</codeLibrary>");
+				sw.Flush();
+
+				gz.Flush();
+			}
+		}
 
 		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
 		{
@@ -48,7 +51,7 @@
 
 			//msg.Attachments.Add(CreateAttachmentFromText(sw, "content.xml", "text/xml"));
 			msg.Attachments.Add(CreateAttachmentFromBytes(ms.ToArray(), context.ClientName + "-codelibrary.xml.gz", "application/x-gzip"));
-		
+
 			//Util.Email("CodeSync", sb.ToString(), asset["mail_to"], context.ClientName + "@cms.crownpeak.com", CrownPeak.CMSAPI.ContentType.TextPlain);
 
 			try
@@ -56,14 +59,14 @@
 				System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient("mail.evolvedhosts.net", 25);
 				client.Credentials = new System.Net.NetworkCredential("outgoing@evolvedhosts.net", "Letmein1!");
 				client.Send(msg);
-                Out.WriteLine("msg sent.");
+				Out.WriteLine("msg sent.");
 
 				asset.DeleteContentField("mail_to");
 			}
 			catch (Exception ex)
 			{
 				Out.DebugWriteLine("Failed to send mail: " + ex.ToString());
-				throw new ApplicationException("Failed to send mail.", ex);				
+				throw new ApplicationException("Failed to send mail.", ex);
 			}
 
 			asset.DeleteContentField("log");
@@ -71,10 +74,10 @@
 	}
 	catch (Exception ex)
 	{
-			Out.DebugWriteLine("Exception occurred: " + ex.ToString());
-			asset.SaveContentField("log", ex.ToString());
+		Out.DebugWriteLine("Exception occurred: " + ex.ToString());
+		asset.SaveContentField("log", ex.ToString());
 	}
-	finally 
+	finally
 	{
 		Out.DebugWriteLine("clearing mail_to field.");
 		asset.SaveContentField("mail_to", null);
@@ -83,17 +86,17 @@
 %>
 
 <script runat="server" data-cpcode="true">#line 82
-//Logger Log = LogManager.GetCurrentClassLogger(); 
-	
+	//Logger Log = LogManager.GetCurrentClassLogger(); 
+
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	string[] Paths = new string[] { "/System/Library", "/System/Templates" };
-	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral","/System/Templates/SimpleSiteCSharp","/System" };
+	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral", "/System/Templates/SimpleSiteCSharp", "/System" };
 
 	void WriteFolderAndChildren(Asset folder, bool deep, System. IO.TextWriter sb)
 	{
-		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase)) 
-		{ 
+		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
+		{
 			Out.DebugWriteLine("assetpath '{0}' contained in PathsIgnore.  skipping.", folder.AssetPath);
 			return;
 		}
@@ -101,7 +104,7 @@
 		{
 			Out.DebugWriteLine("listing contents of folder '{0}'", folder.AssetPath);
 		}
-		
+
 		List<Asset> assetsInFolder = folder.GetFileList();
 		foreach (var asset1 in assetsInFolder)
 		{
@@ -115,7 +118,7 @@
 			}
 		}
 
-		if(deep)
+		if (deep)
 		{
 			foreach (Asset folder2 in folder.GetFolderList())
 			{
@@ -124,12 +127,12 @@
 		}
 	}
 
-	void WriteFileNode(Asset asset, System. IO. TextWriter sb) 
+	void WriteFileNode(Asset asset, System. IO.TextWriter sb)
 	{
 		Out.DebugWriteLine("writing {0}", asset.AssetPath);
-		
+
 		sb.Write("<codeFile");
-		
+
 		try
 		{
 			User modifiedBy;
@@ -143,7 +146,7 @@
 				modifiedBy = usersDictionary[asset.ModifiedUserId];
 			}
 			string modifiedByUserStr = Util.HtmlEncode(string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email));
-		
+
 			sb.Write(" name=\"{0}\" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
 
 			//System
@@ -161,7 +164,7 @@
 			//{
 			//    var bytes = Encoding.UTF8.GetBytes(asset["body"]);
 			//    gzip.Write(bytes, 0, bytes.Length);
-			
+
 			//    //sb.AppendFormat("[[{0}]]", bytes.Length);
 			//}
 			//sb.Append(Convert.ToBase64String(memstream.ToArray()));
@@ -169,9 +172,9 @@
 			var bytes = Encoding.UTF8.GetBytes(asset["body"]);
 			sb.Write(Convert.ToBase64String(bytes));
 
-			
-		} 
-		catch(Exception ex) 
+
+		}
+		catch (Exception ex)
 		{
 			sb.Write(">"); //finish the codeFile node
 			string message = string.Format("/* Failed while reading asset {0} ({1}):\n{2}\n\n */", asset.AssetPath, asset.Id, ex.ToString());
@@ -179,13 +182,13 @@
 		}
 		sb.WriteLine("</codeFile>");
 	}
-    
+
 	static System
 		.Net
 		.Mail.Attachment CreateAttachmentFromText(string value, string name, string contentType = "text/plain")
 	{
 		System
-			.IO.MemoryStream ms=new System
+			.IO.MemoryStream ms = new System
 				.IO.MemoryStream(Encoding.UTF8.GetBytes(value));
 
 		System
