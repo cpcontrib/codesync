@@ -79,7 +79,7 @@
 	}
 %>
 
-<script runat="server" data-cpcode="true">
+<script runat="server" data-cpcode="true">#line 82
 //Logger Log = LogManager.GetCurrentClassLogger(); 
 	
 	DateTime? ModifiedSince;
@@ -88,10 +88,7 @@
 	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral",
 						  "/System/Templates/SimpleSiteCSharp",
 						  "/System" };
-	void WriteFolderAndChildren(System .IO.DirectoryInfo dir, System. IO.TextWriter sb)
-	{
-		
-	}
+
 	void WriteFolderAndChildren(Asset folder, bool deep, System. IO.TextWriter sb)
 	{
 		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase)) 
@@ -125,46 +122,60 @@
 			}
 		}
 	}
-	void WriteFileNode(Asset asset, System. IO. TextWriter sb)
+
+	void WriteFileNode(Asset asset, System. IO. TextWriter sb) 
 	{
 		Out.DebugWriteLine("writing {0}", asset.AssetPath);
-		User modifiedBy;
-		if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
-		{
-			modifiedBy = CrownPeak.CMSAPI.User.Load(asset.ModifiedUserId);
-			usersDictionary[asset.ModifiedUserId] = modifiedBy;
-		}
-		else
-		{
-			modifiedBy = usersDictionary[asset.ModifiedUserId];
-		}
-        string modifiedByUserStr = Util.HtmlEncode(string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email));
 		
-		sb.Write("<codeFile name=\"{0}\" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
+		sb.Write("<codeFile");
+		
+		try
+		{
+			User modifiedBy;
+			if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
+			{
+				modifiedBy = CrownPeak.CMSAPI.User.Load(asset.ModifiedUserId);
+				usersDictionary[asset.ModifiedUserId] = modifiedBy;
+			}
+			else
+			{
+				modifiedBy = usersDictionary[asset.ModifiedUserId];
+			}
+			string modifiedByUserStr = Util.HtmlEncode(string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email));
+		
+			sb.Write(" name=\"{0}\" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
 
-		//System
-		//    .IO
-		//    .MemoryStream memstream = new System
-		//        .IO
-		//        .MemoryStream();
+			//System
+			//    .IO
+			//    .MemoryStream memstream = new System
+			//        .IO
+			//        .MemoryStream();
 
-		//using (System
-		//    .IO
-		//    .Compression.GZipStream gzip = new System
-		//        .IO
-		//        .Compression.GZipStream(memstream, System
-		//            .IO.Compression.CompressionMode.Compress))
-		//{
-		//    var bytes = Encoding.UTF8.GetBytes(asset["body"]);
-		//    gzip.Write(bytes, 0, bytes.Length);
+			//using (System
+			//    .IO
+			//    .Compression.GZipStream gzip = new System
+			//        .IO
+			//        .Compression.GZipStream(memstream, System
+			//            .IO.Compression.CompressionMode.Compress))
+			//{
+			//    var bytes = Encoding.UTF8.GetBytes(asset["body"]);
+			//    gzip.Write(bytes, 0, bytes.Length);
 			
-		//    //sb.AppendFormat("[[{0}]]", bytes.Length);
-		//}
-		//sb.Append(Convert.ToBase64String(memstream.ToArray()));
+			//    //sb.AppendFormat("[[{0}]]", bytes.Length);
+			//}
+			//sb.Append(Convert.ToBase64String(memstream.ToArray()));
 
-		var bytes = Encoding.UTF8.GetBytes(asset["body"]);
-		sb.Write(Convert.ToBase64String(bytes));
+			var bytes = Encoding.UTF8.GetBytes(asset["body"]);
+			sb.Write(Convert.ToBase64String(bytes));
 
+			
+		} 
+		catch(Exception ex) 
+		{
+			sb.Write(">"); //finish the codeFile node
+			string message = string.Format("/* Failed while reading asset {0} ({1}):\n{2}\n\n */", asset.AssetPath, asset.Id, ex.ToString());
+			sb.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(message)));
+		}
 		sb.WriteLine("</codeFile>");
 	}
 
