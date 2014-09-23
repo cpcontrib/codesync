@@ -149,21 +149,28 @@ namespace ConsoleApplication1
 
 				string fullpath = Path.Combine(basepath, filepath);
 
-				byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
+				if(node.Value != "")
+				{ 
+					byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
-				using (var outputStream = File.OpenWrite(fullpath))
-				{
-
-					using (Stream inputStream = PrepareInputStream(base64contentgzip))
+					using (var outputStream = File.OpenWrite(fullpath))
 					{
-						int bytesRead = -1;
-						do
-						{
-							bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
-							outputStream.Write(base64contentgzip, 0, bytesRead);
-						} while (bytesRead > 0);
-					}
 
+						using (Stream inputStream = PrepareInputStream(base64contentgzip))
+						{
+							int bytesRead = -1;
+							do
+							{
+								bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
+								outputStream.Write(base64contentgzip, 0, bytesRead);
+							} while (bytesRead > 0);
+						}
+
+					}
+				}
+				else
+				{
+					//Log.Warn("file node '{0}' contained no content.", node.Attribute("name").Value);
 				}
 
 				if(Options.Verbose)
