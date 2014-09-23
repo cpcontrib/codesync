@@ -25,10 +25,12 @@ namespace ConsoleApplication1
 		static void Main(string[] args)
 		{
 			Options = new Options();
-			if (CommandLine.Parser.Default.ParseArgumentsStrict(args, Options) == false)
-			{
-				Environment.Exit(1);
-			}
+			CommandLine.Parser.Default.ParseArguments(args, Options); 
+			//, () => { 
+			//	CommandLine.Text.HelpText.AutoBuild(Options); 
+			//	if(Debugger.IsAttached) Console.ReadKey();
+			//	Environment.Exit(1); 
+			//});
 
 			Stopwatch sw=new Stopwatch();
 			sw.Start();

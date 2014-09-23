@@ -21,7 +21,10 @@ namespace ConsoleApplication1
 		[Option('v', "verbose")]
 		public bool Verbose { get;set; }
 
-		[ValueOption(0)]
-		public string[] Values { get; set; }
+		//[ValueList(typeof(string))]
+		//public IList<string> Values { get; set; }
+
+		//[ParserState]
+		//public IParserState LastParserState { get;set; }
 	}
 }
