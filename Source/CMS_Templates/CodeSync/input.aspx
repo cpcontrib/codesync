@@ -5,7 +5,9 @@
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <%//This plugin uses InputContext as its context class type%>
 <%
-// input.aspx: template file to specify content entry input form
+
+	Input.ShowTextBox("Paths to include", "paths_include", "/System/Library\n/System/Templates", helpMessage:"One directory per line.", height:3);
+	Input.ShowTextBox("Paths to exclude", "paths_exclude", "/System/Templates/AdventGeneral\n/System/Templates/SimpleSiteCSharp", helpMessage: "One directory per line", height: 5);
 
 	Input.ShowTextBox("Email to", "mail_to");
 

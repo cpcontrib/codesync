@@ -5,6 +5,11 @@
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
+
+	if (string.IsNullOrEmpty(asset.Raw["paths_include"]) == false)
+		Paths = asset.Raw["paths_include"].Split('\n').Select(_ => _.Trim()).ToArray();
+	if (string.IsNullOrEmpty(asset.Raw["paths_exclude"]) == false)
+		PathsIgnore = asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim()).ToArray();
 	
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
@@ -29,8 +34,6 @@
 
 				    WriteFolderAndChildren(folder, true, sw);
 			    }
-                //WriteFolderAndChildren(new System. IO.DirectoryInfo("C:\\Windows\\Temp"), sw);
-                WriteAssemblies(sw);
 
 			    sw.Write("</codeLibrary>");
 			    sw.Flush();
@@ -85,9 +88,7 @@
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	string[] Paths = new string[] { "/System/Library", "/System/Templates" };
-	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral",
-						  "/System/Templates/SimpleSiteCSharp",
-						  "/System" };
+	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral","/System/Templates/SimpleSiteCSharp","/System" };
 
 	void WriteFolderAndChildren(Asset folder, bool deep, System. IO.TextWriter sb)
 	{
@@ -178,7 +179,7 @@
 		}
 		sb.WriteLine("</codeFile>");
 	}
-
+    
 	static System
 		.Net
 		.Mail.Attachment CreateAttachmentFromText(string value, string name, string contentType = "text/plain")
