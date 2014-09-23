@@ -63,6 +63,15 @@ namespace ConsoleApplication1
 				filename = args[0];
 			}
 
+			if(Options.OutputDir == null)
+			{
+				Options.OutputDir = Path.GetDirectoryName(filename);
+				if(Options.OutputDir == "")
+				{
+					Options.OutputDir = ".\\";
+				}
+			}
+
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
 			foreach (var filenode in codeFileElements)
