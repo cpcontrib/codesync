@@ -144,7 +144,9 @@ namespace ConsoleApplication1
 			}
 			catch (Exception ex)
 			{
-				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", node.Attribute("name").Value, ex.ToString());
+				string nameAttrValue=""; try { nameAttrValue = node.Attribute("name").Value; } catch {}
+				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
+				Console.Error.WriteLine(node.ToString());
 			}
 
 		}
