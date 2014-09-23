@@ -57,6 +57,8 @@ namespace ConsoleApplication1
 			{
 				WriteFile(filenode, basepath);
 			}
+
+			if(Debugger.IsAttached) Console.ReadKey();
 		}
 
 		static IEnumerable<XElement> LoadFromFile(string filename)
