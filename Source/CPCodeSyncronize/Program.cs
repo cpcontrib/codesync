@@ -21,7 +21,8 @@ namespace ConsoleApplication1
 		}
 		static void Main(string[] args)
 		{
-			
+			Stopwatch sw=new Stopwatch();
+			sw.Start();
 
 			string filename;
 			string basepath = SafeArgs(args,1);
@@ -57,6 +58,9 @@ namespace ConsoleApplication1
 			{
 				WriteFile(filenode, basepath);
 			}
+
+			sw.Stop();
+			Console.WriteLine("Completed in {0:0.00} secs", ((float)sw.ElapsedMilliseconds / (float)1000));
 
 			if(Debugger.IsAttached) Console.ReadKey();
 		}
