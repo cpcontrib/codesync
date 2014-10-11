@@ -12,7 +12,7 @@ namespace ConsoleApplication1
 		[Option("input", HelpText="Input codesync xml file for reading. Supports .gz internally.")]
 		public string InputFile { get;set;}
 
-		[Option("outputdir", HelpText="Directory to output.  Default is same directory as input file (.\\)")]
+		[Option('o', "outputdir", HelpText="Directory to output.  Default is same directory as input file (.\\)")]
 		public string OutputDir { get;set; }
 
 		[Option("createdir", HelpText="Create directory if neccesary")]
