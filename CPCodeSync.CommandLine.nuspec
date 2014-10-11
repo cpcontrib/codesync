@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>CPCodeSync.CommandLine</id>
+    <version>1.0.0</version>
+    <authors>eric.newton</authors>
+    <owners>eric.newton</owners>
+    <!--<licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>-->
+    <projectUrl>http://bitbucket.org/lightmakerusa/CPCodeSyncronize</projectUrl>
+    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>CPCodeSync commandline utility</description>
+    <!--<releaseNotes>Summary of changes made in this release of the package.</releaseNotes>-->
+    <copyright>Copyright 2014</copyright>
+    <tags>CrownPeak cpcodesync</tags>
+    <dependencies>
+      <dependency id="CommandLineParser" version="1.9.71" />
+    </dependencies>
+  </metadata>
+</package>
