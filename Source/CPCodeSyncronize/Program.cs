@@ -84,7 +84,9 @@ namespace ConsoleApplication1
 			if(Options.Verbose==false) Console.WriteLine();
 			Console.WriteLine("Completed in {0:0.00} secs", ((float)sw.ElapsedMilliseconds / (float)1000));
 
-			if(Debugger.IsAttached) Console.ReadKey();
+			if(Debugger.IsAttached) {
+				System.Threading.Tasks.Task.Factory.StartNew(() => Console.ReadKey()).Wait(TimeSpan.FromSeconds(10));
+			}
 		}
 
 		static IEnumerable<XElement> LoadFromFile(string filename)
