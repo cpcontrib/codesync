@@ -38,14 +38,14 @@ ECHO.
 ECHO Building Nuget Package:
 pushd %BUILDPATH%\NugetPack
 copy %~dp0\CPCodeSync.CommandLine.nuspec .
-%PACKAGES%\Nuget.CommandLine.2.8.2\tools\Nuget.exe pack CPCodeSync.CommandLine.nuspec
+%PACKAGES%\Nuget.CommandLine.2.8.2\tools\Nuget.exe pack CPCodeSync.CommandLine.nuspec -Version %BUILD_VERSION%
 popd
 
 :NUGET_UPLOAD
 ECHO.
 ECHO Uploading Nuget package:
 pushd %BUILDPATH%\NugetPack
-%PACKAGES%\Nuget.CommandLine.2.8.2.\tools\Nuget.exe push CPCodeSync.CommandLine.nupkg -Version %BUILD_VERSION% -Source http://nuget.lightmaker.com/ 
+%PACKAGES%\Nuget.CommandLine.2.8.2.\tools\Nuget.exe push CPCodeSync.CommandLine.%BUILD_VERSION%.nupkg -Source http://nuget.lightmaker.com/
 popd
 
 ECHO.
