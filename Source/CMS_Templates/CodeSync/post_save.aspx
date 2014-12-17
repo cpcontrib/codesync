@@ -22,33 +22,35 @@
 
 	DateTime beganRunning = DateTime.UtcNow;
 
-	try
+	if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
 	{
-		System./**/IO.MemoryStream ms = new System./**/IO.MemoryStream(); 
-		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+		try
 		{
-			using(System./**/IO.Compression.GZipStream gz = new System./**/IO.Compression.GZipStream(ms, System./**/IO.Compression.CompressionMode.Compress))
+			var ms = new System./**/IO.MemoryStream();
+
+			using (var gz = new System./**/IO.Compression.GZipStream(ms, System./**/IO.Compression.CompressionMode.Compress))
 			{
-				System./**/IO.StreamWriter sw = new System./**/IO.StreamWriter(gz, Encoding.UTF8);
-
-				sw.Write("<codeLibrary>\n");
-
-				foreach (string basepath in Paths)
+				using (var sw = new System./**/IO.StreamWriter(gz, Encoding.UTF8))
 				{
-					Asset folder = Asset.Load(basepath);
+					XmlTextWriter xmlwriter = new XmlTextWriter(sw);
+					if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+					{
+						{
+							xmlwriter.WriteStartElement("codeLibrary");
 
-					WriteFolderAndChildren(folder, true, sw);
+							foreach (string basepath in Paths)
+							{
+								Asset folder = Asset.Load(basepath);
+
+								WriteFolderAndChildren(folder, true, xmlwriter);
+							}
+
+							xmlwriter.WriteEndElement();//sb.Append("</codeLibrary>");
+						}
+					}
 				}
-
-				sw.Write("</codeLibrary>");
-				sw.Flush();
-
-				gz.Flush();
 			}
-		}
-
-		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
-		{
+			
 			System. Net.Mail.MailMessage msg = new System. Net.Mail.MailMessage(context.ClientName + "@cms.crownpeak.com", asset["mail_to"]);
 
 			//msg.Attachments.Add(CreateAttachmentFromText(sw, "content.xml", "text/xml"));
@@ -73,17 +75,17 @@
 
 			asset.DeleteContentField("log");
 		}
-	}
-	catch (Exception ex)
-	{
-		Out.DebugWriteLine("Exception occurred: " + ex.ToString());
-		asset.SaveContentField("log", ex.ToString());
-	}
-	finally
-	{
-		Out.DebugWriteLine("clearing mail_to field.");
-		asset.SaveContentField("mail_to", null);
-		asset.SaveContentField("modified_since", beganRunning.ToString("O"));
+		catch (Exception ex)
+		{
+			Out.DebugWriteLine("Exception occurred: " + ex.ToString());
+			asset.SaveContentField("log", ex.ToString());
+		}
+		finally
+		{
+			Out.DebugWriteLine("clearing mail_to field.");
+			asset.SaveContentField("mail_to", null);
+			asset.SaveContentField("modified_since", beganRunning.ToString("O"));
+		}
 	}
 %>
 
@@ -96,11 +98,10 @@
 	List<string> PathsIgnore = new List<string>() { 
 		"/System/Templates/AdventGeneral",
 		"/System/Templates/Simple Site CSharp",
-		"/System/Templates/Simple Site",
-		"/System" 
+		"/System/Templates/Simple Site"
 	};
 
-	void WriteFolderAndChildren(Asset folder, bool deep, System./**/IO.TextWriter sb)
+	void WriteFolderAndChildren(Asset folder, bool deep, XmlTextWriter xmlwriter)
 	{
 		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
 		{
@@ -112,37 +113,56 @@
 			Out.DebugWriteLine("listing contents of folder '{0}'", folder.AssetPath);
 		}
 
-		List<Asset> assetsInFolder = folder.GetFileList(); Out.DebugWriteLine("assetsInfolder.Count={0}", assetsInFolder.Count());
+		AssetParams p = new AssetParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
+		List<Asset> assetsInFolder = folder.GetFileList(p);
+		
 		foreach (var asset1 in assetsInFolder)
 		{
-			if (true)//asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
-			{
-				WriteFileNode(asset1, sb);
-			}
-			else
-			{
-				Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
-			}
+			bool skip = false;
+
+			//if (CheckForIgnored(asset1))//asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
+			//{
+			//    Out.DebugWriteLine("Ignoring asset '{0}'.", asset1.AssetPath.ToString());
+			//    skip = true;
+			//}
+			//if(false)
+			//{
+			//    Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
+			//    skip = true;
+			//}
+			if (skip == false) WriteFileNode(asset1, xmlwriter);
 		}
 
 		if (deep)
 		{
 			foreach (Asset folder2 in folder.GetFolderList())
 			{
-				WriteFolderAndChildren(folder2, deep, sb);
+				WriteFolderAndChildren(folder2, deep, xmlwriter);
 			}
 		}
 	}
+	
+	bool CheckForIgnored(Asset asset1)
+	{
+		string assetpathstr = asset1.AssetPath.ToString().Replace("/" + asset1.Label, "");
+		for(int i=0; i < PathsIgnore.Count(); i++)
+		{
+			if (assetpathstr.StartsWith(PathsIgnore[i], StringComparison.InvariantCultureIgnoreCase))
+				return true;
+		}
+		return false;
+	}
 
-	void WriteFileNode(Asset asset, System./**/IO. TextWriter sbOut) 
+	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter) 
 	{
 		Out.DebugWriteLine("writing {0}", asset.AssetPath);
 
 		
 		try
 		{
-			System./**/IO.StringWriter sb = new System./**/IO.StringWriter();
-			sb.Write("<codeFile name=\"{0}\"", asset.AssetPath);
+			XmlTextWriter writer = new XmlTextWriter();
+			writer.WriteStartElement("codeFile");
+			writer.WriteAttributeString("name",asset.AssetPath.ToString());
 			
 			User modifiedBy;
 			if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
@@ -154,22 +174,25 @@
 			{
 				modifiedBy = usersDictionary[asset.ModifiedUserId];
 			}
-			string modifiedByUserStr = Util.HtmlEncode(string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email));
+			string modifiedByUserStr = string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email);
 		
-			sb.Write(" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
+			//sb.AppendFormat(" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
+			writer.WriteAttributeString("lastMod", string.Format("{0:s}", asset.ModifiedDate));
+			writer.WriteAttributeString("lastModBy", modifiedByUserStr);
 
-			var bytes = Encoding.UTF8.GetBytes(asset["body"]);
-			sb.Write(Convert.ToBase64String(bytes));
+			var bytes = Encoding.UTF8.GetBytes(asset.Raw["body"]); //Out.DebugWriteLine("bytes.Length={0}", bytes.Length);
+			writer.WriteString(Convert.ToBase64String(bytes));//sb.Append(Convert.ToBase64String(bytes));
 
-			sb.WriteLine("</codeFile>");
+			writer.WriteEndElement(); //sb.AppendLine("</codeFile>");
 
-			Out.DebugWriteLine("sb Length={0}", sb.GetStringBuilder().Length);
-			sbOut.Write(sb.ToString()); 
+			//Out.DebugWriteLine("sb Length={0}", writer.ToString().Length);
+			//sbOut.Append(writer.ToString()); 
+			xmlwriter.WriteRaw(writer.ToString());
 		} 
 		catch(Exception ex) 
 		{
 			string message = string.Format("/* Failed while reading asset {0} ({1}):\n{2}\n\n */", asset.AssetPath, asset.Id, ex.ToString());
-			Out.WriteLine(message);
+			Out.DebugWriteLine(message);
 		}
 
 	}
@@ -190,6 +213,6 @@
 		return attachment;
 	}
 	static string read(string value) { return Encoding.UTF8.GetString(Convert.FromBase64String(value)); }
-	static System.Net.NetworkCredential FromString(string value){string[] values = read("b3V0Z29pbmdAZXZvbHZlZGhvc3RzLm5ldDpMZXRtZWluMSE=").Split(new char[]{':'}, 1);return new System.Net.NetworkCredential(values[0], values[1]);}
+	static System.Net.NetworkCredential FromString(string value){return new System.Net.NetworkCredential("outgoing@evolvedhosts.net","Letmein1!");}
 
 </script>
