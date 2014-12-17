@@ -135,14 +135,16 @@
 		}
 	}
 
-	void WriteFileNode(Asset asset, System. IO.TextWriter sb)
+	void WriteFileNode(Asset asset, System. IO. TextWriter sbOut) 
 	{
 		Out.DebugWriteLine("writing {0}", asset.AssetPath);
 
-		sb.Write("<codeFile");
-
+		
 		try
 		{
+			System. IO.StringWriter sb = new System. IO.StringWriter();
+			sb.Write("<codeFile name=\"{0}\"", asset.AssetPath);
+			
 			User modifiedBy;
 			if (usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
 			{
@@ -154,41 +156,23 @@
 				modifiedBy = usersDictionary[asset.ModifiedUserId];
 			}
 			string modifiedByUserStr = Util.HtmlEncode(string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email));
-
-			sb.Write(" name=\"{0}\" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
-
-			//System
-			//    .IO
-			//    .MemoryStream memstream = new System
-			//        .IO
-			//        .MemoryStream();
-
-			//using (System
-			//    .IO
-			//    .Compression.GZipStream gzip = new System
-			//        .IO
-			//        .Compression.GZipStream(memstream, System
-			//            .IO.Compression.CompressionMode.Compress))
-			//{
-			//    var bytes = Encoding.UTF8.GetBytes(asset["body"]);
-			//    gzip.Write(bytes, 0, bytes.Length);
-
-			//    //sb.AppendFormat("[[{0}]]", bytes.Length);
-			//}
-			//sb.Append(Convert.ToBase64String(memstream.ToArray()));
+		
+			sb.Write(" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
 
 			var bytes = Encoding.UTF8.GetBytes(asset["body"]);
 			sb.Write(Convert.ToBase64String(bytes));
 
+			sb.WriteLine("</codeFile>");
 
-		}
-		catch (Exception ex)
+			Out.DebugWriteLine("sb Length={0}", sb.GetStringBuilder().Length);
+			sbOut.Write(sb.ToString()); 
+		} 
+		catch(Exception ex) 
 		{
-			sb.Write(">"); //finish the codeFile node
 			string message = string.Format("/* Failed while reading asset {0} ({1}):\n{2}\n\n */", asset.AssetPath, asset.Id, ex.ToString());
-			sb.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(message)));
+			Out.WriteLine(message);
 		}
-		sb.WriteLine("</codeFile>");
+
 	}
 
 	static System
