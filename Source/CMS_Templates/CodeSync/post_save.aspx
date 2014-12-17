@@ -24,12 +24,12 @@
 
 	try
 	{
-		System. IO.MemoryStream ms = new System. IO.MemoryStream();
+		System./**/IO.MemoryStream ms = new System./**/IO.MemoryStream(); 
 		if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
 		{
-			using (System. IO.Compression.GZipStream gz = new System. IO.Compression.GZipStream(ms, System. IO.Compression.CompressionMode.Compress))
+			using(System./**/IO.Compression.GZipStream gz = new System./**/IO.Compression.GZipStream(ms, System./**/IO.Compression.CompressionMode.Compress))
 			{
-				System. IO.StreamWriter sw = new System. IO.StreamWriter(gz, Encoding.UTF8);
+				System./**/IO.StreamWriter sw = new System./**/IO.StreamWriter(gz, Encoding.UTF8);
 
 				sw.Write("<codeLibrary>\n");
 
@@ -100,7 +100,7 @@
 		"/System" 
 	};
 
-	void WriteFolderAndChildren(Asset folder, bool deep, System. IO.TextWriter sb)
+	void WriteFolderAndChildren(Asset folder, bool deep, System./**/IO.TextWriter sb)
 	{
 		if (PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
 		{
@@ -134,14 +134,14 @@
 		}
 	}
 
-	void WriteFileNode(Asset asset, System. IO. TextWriter sbOut) 
+	void WriteFileNode(Asset asset, System./**/IO. TextWriter sbOut) 
 	{
 		Out.DebugWriteLine("writing {0}", asset.AssetPath);
 
 		
 		try
 		{
-			System. IO.StringWriter sb = new System. IO.StringWriter();
+			System./**/IO.StringWriter sb = new System./**/IO.StringWriter();
 			sb.Write("<codeFile name=\"{0}\"", asset.AssetPath);
 			
 			User modifiedBy;
@@ -173,30 +173,19 @@
 		}
 
 	}
-
-	static System
-		.Net
-		.Mail.Attachment CreateAttachmentFromText(string value, string name, string contentType = "text/plain")
+	
+	static System.Net.Mail.Attachment CreateAttachmentFromText(string value, string name, string contentType = "text/plain")
 	{
-		System
-			.IO.MemoryStream ms = new System
-				.IO.MemoryStream(Encoding.UTF8.GetBytes(value));
+		System./**/IO.MemoryStream ms=new System./**/IO.MemoryStream(Encoding.UTF8.GetBytes(value));
 
-		System
-			.Net.Mail.Attachment attachment = new System.
-				Net.Mail.Attachment(ms, name, contentType);
+		System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(ms, name, contentType);
 
 		return attachment;
 	}
 
-	static System
-		.Net
-		.Mail.Attachment CreateAttachmentFromBytes(byte[] bytes, string name, string contentType)
+	static System.Net.Mail.Attachment CreateAttachmentFromBytes(byte[] bytes, string name, string contentType)
 	{
-
-		System
-			.Net.Mail.Attachment attachment = new System.
-				Net.Mail.Attachment(new System. IO.MemoryStream(bytes), name, contentType);
+		System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(new System./**/IO.MemoryStream(bytes), name, contentType);
 
 		return attachment;
 	}
