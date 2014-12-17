@@ -6,12 +6,15 @@
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
-
+	
 	if (string.IsNullOrEmpty(asset.Raw["paths_include"]) == false)
-		Paths = asset.Raw["paths_include"].Split('\n').Select(_ => _.Trim()).ToArray();
+		Paths.AddRange(asset.Raw["paths_include"].Split('\n').Select(_ => _.Trim()));
 	if (string.IsNullOrEmpty(asset.Raw["paths_exclude"]) == false)
-		PathsIgnore = asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim()).ToArray();
-
+		PathsIgnore.AddRange(asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim()));
+		 
+	Out.DebugWriteLine("Paths: {0}", String.Join("|", Paths));
+	Out.DebugWriteLine("PathsIgnore: {0}", String.Join("|", PathsIgnore));
+		
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
 	try { this.ModifiedSince = DateTime.Parse(asset.Raw["modified_since"]); }
@@ -90,8 +93,13 @@
 
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
-	string[] Paths = new string[] { "/System/Library", "/System/Templates" };
-	string[] PathsIgnore = new string[] { "/System/Templates/AdventGeneral", "/System/Templates/SimpleSiteCSharp", "/System" };
+	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
+	List<string> PathsIgnore = new List<string>() { 
+		"/System/Templates/AdventGeneral",
+		"/System/Templates/Simple Site CSharp",
+		"/System/Templates/Simple Site",
+		"/System" 
+	};
 
 	void WriteFolderAndChildren(Asset folder, bool deep, System. IO.TextWriter sb)
 	{
