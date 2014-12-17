@@ -35,7 +35,6 @@
 
 				foreach (string basepath in Paths)
 				{
-					Out.DebugWriteLine("beginning with path: {0}", basepath);
 					Asset folder = Asset.Load(basepath);
 
 					WriteFolderAndChildren(folder, true, sw);
@@ -88,9 +87,9 @@
 	}
 %>
 
-<script runat="server" data-cpcode="true">#line 82
-	//Logger Log = LogManager.GetCurrentClassLogger(); 
-
+<script runat="server" data-cpcode="true">
+//Logger Log = LogManager.GetCurrentClassLogger(); 
+	
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
@@ -113,10 +112,10 @@
 			Out.DebugWriteLine("listing contents of folder '{0}'", folder.AssetPath);
 		}
 
-		List<Asset> assetsInFolder = folder.GetFileList();
+		List<Asset> assetsInFolder = folder.GetFileList(); Out.DebugWriteLine("assetsInfolder.Count={0}", assetsInFolder.Count());
 		foreach (var asset1 in assetsInFolder)
 		{
-			if (asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
+			if (true)//asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
 			{
 				WriteFileNode(asset1, sb);
 			}
