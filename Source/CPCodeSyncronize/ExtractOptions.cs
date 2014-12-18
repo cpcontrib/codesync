@@ -7,7 +7,7 @@ using CommandLine;
 namespace ConsoleApplication1
 {
 
-	public class Options
+	public class ExtractOptions
 	{
 		[Option("input", HelpText="Input codesync xml file for reading. Supports .gz internally.")]
 		public string InputFile { get;set;}

@@ -13,11 +13,11 @@ namespace ConsoleApplication1
 	class Program
 	{
 
-		static Options Options;
+		static ExtractOptions Options;
 
 		static void Main(string[] args)
 		{
-			Options = new Options();
+			Options = new ExtractOptions();
 			CommandLine.Parser.Default.ParseArguments(args, Options); 
 			//, () => { 
 			//	CommandLine.Text.HelpText.AutoBuild(Options); 
@@ -89,7 +89,7 @@ namespace ConsoleApplication1
 			}
 		}
 
-		static void ScanElementsPath(string filename, Options options)
+		static void ScanElementsPath(string filename, ExtractOptions options)
 		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
