@@ -25,9 +25,6 @@ namespace ConsoleApplication1
 			//	Environment.Exit(1); 
 			//});
 
-			Stopwatch sw=new Stopwatch();
-			sw.Start();
-
 			string filename;
 
 			string fullUri = args[0];// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
@@ -72,20 +69,55 @@ namespace ConsoleApplication1
 				}
 			}
 
+			if(Options.Verbose)
+			{
+				Console.WriteLine("OutputDir: {0}", Options.OutputDir);
+			}
+
+			//ScanElementsPath(filename, Options);
+
+			TimeSpan writefilesTimeSpan = ExecuteTimed( ()=>{ WriteFiles(filename); } );
+
+			if(Options.Verbose==false) Console.WriteLine();
+			Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));
+
+			if(Debugger.IsAttached) {
+				System.Threading.Tasks.Task.Factory.StartNew(() => Console.ReadKey()).Wait(TimeSpan.FromSeconds(10));
+			}
+		}
+
+		static void ScanElementsPath(string filename, Options options)
+		{
+			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
+
+			List<string> relPaths = new List<string>(100);
+
+			foreach (var filenode in codeFileElements)
+			{
+				relPaths.Add(filenode.Attribute("name").Value);
+			}
+
+		}
+
+		static TimeSpan ExecuteTimed(Action action)
+		{
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+
+			action();
+
+			sw.Stop();
+
+			return sw.Elapsed;
+		}
+
+		static void WriteFiles(string filename)
+		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
 			foreach (var filenode in codeFileElements)
 			{
 				WriteFile(filenode, Options.OutputDir);
-			}
-
-			sw.Stop();
-
-			if(Options.Verbose==false) Console.WriteLine();
-			Console.WriteLine("Completed in {0:0.00} secs", ((float)sw.ElapsedMilliseconds / (float)1000));
-
-			if(Debugger.IsAttached) {
-				System.Threading.Tasks.Task.Factory.StartNew(() => Console.ReadKey()).Wait(TimeSpan.FromSeconds(10));
 			}
 		}
 
