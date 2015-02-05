@@ -187,9 +187,8 @@ namespace ConsoleApplication1
 				{ 
 					byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
-					using (var outputStream = File.OpenWrite(fullpath))
+					using (var outputStream = new FileStream(fullpath, FileMode.Create, FileAccess.Write))
 					{
-
 						using (Stream inputStream = PrepareInputStream(base64contentgzip))
 						{
 							int bytesRead = -1;
@@ -199,7 +198,7 @@ namespace ConsoleApplication1
 								outputStream.Write(base64contentgzip, 0, bytesRead);
 							} while (bytesRead > 0);
 						}
-
+						outputStream.Flush();
 					}
 				}
 				else
