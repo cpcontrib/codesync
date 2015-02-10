@@ -21,6 +21,9 @@ namespace ConsoleApplication1
 		[Option('v', "verbose")]
 		public bool Verbose { get;set; }
 
+		[Option('d', "dryrun")]
+		public bool DryRun { get;set; }
+
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
 

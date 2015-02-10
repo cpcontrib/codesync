@@ -41,7 +41,10 @@ namespace ConsoleApplication1
 					}
 
 					if (Options.CreateDir == true)
-						Directory.CreateDirectory(Options.OutputDir);
+					{ 
+						if(Options.Verbose) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
+						if(Options.DryRun==false) Directory.CreateDirectory(Options.OutputDir);
+					}
 				}
 			}
 
@@ -187,18 +190,29 @@ namespace ConsoleApplication1
 				{ 
 					byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
-					using (var outputStream = new FileStream(fullpath, FileMode.Create, FileAccess.Write))
+					Stream outputStream=null;
+					try
 					{
+						if(Options.DryRun == false) 
+							outputStream = new FileStream(fullpath, FileMode.Create, FileAccess.Write);
+						else
+							outputStream = new MemoryStream();
+							
 						using (Stream inputStream = PrepareInputStream(base64contentgzip))
 						{
 							int bytesRead = -1;
 							do
 							{
 								bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
-								outputStream.Write(base64contentgzip, 0, bytesRead);
+								if(Options.DryRun==false) outputStream.Write(base64contentgzip, 0, bytesRead);
 							} while (bytesRead > 0);
 						}
+							
 						outputStream.Flush();
+					}
+					finally
+					{
+						if(outputStream!=null) outputStream.Dispose();
 					}
 				}
 				else
@@ -223,6 +237,7 @@ namespace ConsoleApplication1
 
 		static void EnsureDirectories(string filepath, string basepath)
 		{
+			if(Options.DryRun) return;
 			if (string.IsNullOrEmpty(basepath)) basepath = ".\\";
 			if (Directory.Exists(basepath) == false) throw new InvalidOperationException("basepath doesn't exist");
 
