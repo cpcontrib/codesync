@@ -79,7 +79,7 @@ namespace ConsoleApplication1
 
 			//ScanElementsPath(filename, Options);
 
-			TimeSpan writefilesTimeSpan = ExecuteTimed( ()=>{ WriteFiles(filename); } );
+			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ WriteFiles(filename); } );
 
 			if(Options.Verbose==false) Console.WriteLine();
 			Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));
@@ -102,27 +102,6 @@ namespace ConsoleApplication1
 
 		}
 
-		static TimeSpan ExecuteTimed(Action action)
-		{
-			Stopwatch sw = new Stopwatch();
-			sw.Start();
-
-			action();
-
-			sw.Stop();
-
-			return sw.Elapsed;
-		}
-
-		static void WriteFiles(string filename)
-		{
-			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
-
-			foreach (var filenode in codeFileElements)
-			{
-				WriteFile(filenode, Options.OutputDir);
-			}
-		}
 
 		static IEnumerable<XElement> LoadFromFile(string filename)
 		{
