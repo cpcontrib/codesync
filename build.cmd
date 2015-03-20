@@ -21,6 +21,7 @@ for /d %%d in (*) do rmdir /s /q %%d
 
 :BUILD
 msbuild %SOURCEPATH%\CPCodeSyncronize\CPCodeSyncronize.csproj /p:Configuration=Release;OutputPath=%BUILDPATH%\bin\%config%
+if errorlevel 1 goto :ERROR
 
 :MERGE
 ECHO.
