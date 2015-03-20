@@ -148,9 +148,14 @@ namespace ConsoleApplication1
 		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
+			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
 				WriteFile(filenode, Options.OutputDir);
+				count++;
+				if(Options.Verbose==false)
+					Console.Write("{0} files\r", count);
+				
 			}
 		}
 
@@ -177,6 +182,9 @@ namespace ConsoleApplication1
 			{
 				File.SetLastWriteTime(fullpath, lastMod);
 			}
+
+			if (Options.Verbose)
+				Console.WriteLine("Wrote file '{0}'.", fullpath);
 		}
 
 		private static byte[] S_EmptyByteArray=new byte[0];
@@ -218,11 +226,6 @@ namespace ConsoleApplication1
 				{
 					File.WriteAllBytes(fullpath, S_EmptyByteArray); //Log.Warn("file node '{0}' contained no content.", node.Attribute("name").Value);
 				}
-
-				if (Options.Verbose)
-					Console.WriteLine("Wrote file '{0}'.", fullpath);
-				else
-					Console.Write(".");
 			}
 			catch (Exception ex)
 			{
