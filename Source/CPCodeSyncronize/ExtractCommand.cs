@@ -22,6 +22,13 @@ namespace ConsoleApplication1
 		{
 			string filename;
 
+			//temp hack for listing
+			if(Options.List==true)
+			{
+				ListFiles();
+				return;
+			}
+
 			string fullUri = Options.InputFile;// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
 			if (Options.OutputDir != null && Directory.Exists(Options.OutputDir) == false)
 			{
@@ -74,6 +81,18 @@ namespace ConsoleApplication1
 			WriteFiles(filename);
 		}
 
+
+		private void ListFiles()
+		{
+			var codeFileNodes = LoadFromFile(Options.InputFile);
+
+			int count = 0;
+			foreach(var node in codeFileNodes)
+			{
+				count++;
+				Console.WriteLine("{0}: {1}", count, node.Attribute("name").Value);
+			}
+		}
 
 		static IEnumerable<XElement> LoadFromFile(string filename)
 		{

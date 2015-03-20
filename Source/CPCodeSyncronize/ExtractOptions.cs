@@ -24,6 +24,9 @@ namespace ConsoleApplication1
 		[Option('d', "dryrun")]
 		public bool DryRun { get;set; }
 
+		[Option('l', "list")]
+		public bool List { get;set; }
+
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
 
