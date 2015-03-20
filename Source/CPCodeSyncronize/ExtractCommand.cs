@@ -161,21 +161,34 @@ namespace ConsoleApplication1
 
 		void WriteFile(XElement node, string basepath)
 		{
+			string name = node.Attribute("name").Value;
+
+			string filepath;
+
+			if (name.StartsWith("/"))
+				filepath = name.Substring(1).Replace("/", "\\");
+			else
+				filepath = name.Replace("/", "\\");
+
+			EnsureDirectories(filepath, basepath);
+
+			string fullpath = Path.Combine(basepath, filepath);
+
+			WriteFileContent(node, basepath, fullpath);
+
+			DateTime lastMod;
+			if(DateTime.TryParse(node.Attribute("lastMod").Value, out lastMod)==true)
+			{
+				File.SetLastWriteTime(fullpath, lastMod);
+			}
+		}
+
+		private static byte[] S_EmptyByteArray=new byte[0];
+
+		void WriteFileContent(XElement node, string basepath, string fullpath)
+		{
 			try
 			{
-				string name = node.Attribute("name").Value;
-
-				string filepath;
-
-				if (name.StartsWith("/"))
-					filepath = name.Substring(1).Replace("/", "\\");
-				else
-					filepath = name.Replace("/", "\\");
-
-				EnsureDirectories(filepath, basepath);
-
-				string fullpath = Path.Combine(basepath, filepath);
-
 				if (node.Value != "")
 				{
 					byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
@@ -207,7 +220,7 @@ namespace ConsoleApplication1
 				}
 				else
 				{
-					//Log.Warn("file node '{0}' contained no content.", node.Attribute("name").Value);
+					File.WriteAllBytes(fullpath, S_EmptyByteArray); //Log.Warn("file node '{0}' contained no content.", node.Attribute("name").Value);
 				}
 
 				if (Options.Verbose)
