@@ -87,36 +87,13 @@ namespace ConsoleApplication1
 					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
 				}
 
-				return StreamCodeFileElements(s, "codeFile");
+				return StreamUtils.StreamElements(s, "codeFile");
+				//XDocument xDoc = XDocument.Load(s); s.Close();
+				//return xDoc.Element("codeLibrary").Elements("codeFile");
 			}
 			finally
 			{
 
-			}
-		}
-
-		static IEnumerable<XElement> StreamCodeFileElements(Stream source, string elementName)
-		{
-			using (XmlReader reader = XmlReader.Create(source))
-			{
-				XElement item = null;
-
-				reader.MoveToContent();
-
-				// Parse the file, save header information when encountered, and yield the
-				// Item XElement objects as they are created.
-
-				// loop through codeFile elements
-				while (reader.Read())
-				{
-					if (reader.NodeType == XmlNodeType.Element
-						&& reader.Name == elementName)
-					{
-						item = XElement.ReadFrom(reader) as XElement;
-
-						if (item != null) yield return item;
-					}
-				}
 			}
 		}
 
