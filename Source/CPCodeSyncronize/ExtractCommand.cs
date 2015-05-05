@@ -178,7 +178,7 @@ namespace ConsoleApplication1
 			WriteFileContent(node, basepath, fullpath);
 
 			DateTime lastMod;
-			if(DateTime.TryParse(node.Attribute("lastMod").Value, out lastMod)==true)
+			if(DateTime.TryParse(node.GetAttributeValue("lastMod"), out lastMod)==true)
 			{
 				File.SetLastWriteTime(fullpath, lastMod);
 			}
