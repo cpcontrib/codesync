@@ -195,8 +195,6 @@ namespace ConsoleApplication1
 			{
 				if (node.Value != "")
 				{
-					byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
-
 					Stream outputStream = null;
 					try
 					{
@@ -205,14 +203,25 @@ namespace ConsoleApplication1
 						else
 							outputStream = new MemoryStream();
 
-						using (Stream inputStream = PrepareInputStream(base64contentgzip))
+						if (node.GetAttributeValue("encoding") == "base64")
 						{
-							int bytesRead = -1;
-							do
+							byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
+
+							using (Stream inputStream = PrepareInputStream(base64contentgzip))
 							{
-								bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
-								if (Options.DryRun == false) outputStream.Write(base64contentgzip, 0, bytesRead);
-							} while (bytesRead > 0);
+								int bytesRead = -1;
+								do
+								{
+									bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
+									if (Options.DryRun == false) outputStream.Write(base64contentgzip, 0, bytesRead);
+								} while (bytesRead > 0);
+							}
+						}
+						else
+						{ 
+							StreamWriter  sw=new StreamWriter(outputStream);
+							sw.Write(node.Value.Trim());
+							sw.Flush();
 						}
 
 						outputStream.Flush();
