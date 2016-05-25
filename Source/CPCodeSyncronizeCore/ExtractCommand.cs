@@ -106,7 +106,7 @@ namespace ConsoleApplication1
 					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
 				}
 
-				return StreamUtils.StreamElements(s, "codeFile");
+				return StreamUtils.StreamElements(s, "CodeFile");
 				//XDocument xDoc = XDocument.Load(s); s.Close();
 				//return xDoc.Element("codeLibrary").Elements("codeFile");
 			}
@@ -138,7 +138,7 @@ namespace ConsoleApplication1
 
 			foreach (var filenode in codeFileElements)
 			{
-				relPaths.Add(filenode.Attribute("name").Value);
+				relPaths.Add(filenode.Attribute("Name").Value);
 			}
 
 		}
@@ -162,7 +162,7 @@ namespace ConsoleApplication1
 
 		void WriteFile(XElement node, string basepath)
 		{
-			string name = node.Attribute("name").Value;
+			string name = node.GetAttributeValue("Name");
 
 			string filepath;
 
@@ -203,7 +203,7 @@ namespace ConsoleApplication1
 						else
 							outputStream = new MemoryStream();
 
-						if (node.GetAttributeValue("encoding") == "base64")
+						if (node.GetAttributeValue("Encoding") == "base64")
 						{
 							byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
@@ -239,7 +239,7 @@ namespace ConsoleApplication1
 			catch (Exception ex)
 			{
 				if (Options.Verbose == false) Console.WriteLine();
-				string nameAttrValue = ""; try { nameAttrValue = node.Attribute("name").Value; }
+				string nameAttrValue = ""; try { nameAttrValue = node.Attribute("Name").Value; }
 				catch { }
 				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
 				Console.Error.WriteLine(node.ToString());
