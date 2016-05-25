@@ -129,16 +129,18 @@ namespace CPCodeSyncronize
 				Console.WriteLine("Writing files to path '{0}'.", state.FullOutputPath);
 			}
 
+			bool writeTally = (Options.Verbose == false && Options.Quiet == false);
+			
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
 				WriteFile(filenode, outputDir);
 				count++;
-				
-				if(Options.Verbose==false) Console.Write("Wrote {0} files\r", count);
+
+				if(writeTally) Console.Write("Wrote {0} files\r", count);
 			}
 
-			if(Options.Verbose == false && Options.Quiet == false) Console.WriteLine();
+			if(writeTally) Console.WriteLine();
 		}
 
 

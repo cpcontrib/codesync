@@ -66,15 +66,10 @@ namespace CPCodeSyncronize.Core
 				}
 			}
 
-			if(String.IsNullOrEmpty(Options.OutputDir))
-				state.OutputDir = ".";
+			state.OutputDir = Options.OutputDir ?? ".";
 
 			state.FullOutputPath = Path.GetFullPath(state.OutputDir);
 
-			if(Options.Verbose)
-			{
-				Console.WriteLine("Writing files to path '{0}'.", state.FullOutputPath);
-			}
 		}
 	}
 }
