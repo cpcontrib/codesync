@@ -46,30 +46,43 @@ namespace CPCodeSyncronize.Core
 
 		private void ReadOutputDir(ExtractOptions Options, ref CPCodeSyncronize.ExtractCommand.ExtractState state)
 		{
-			if(Options.OutputDir != null && Directory.Exists(Options.OutputDir) == false)
+			if(Options.Scratch == true)
 			{
-				if(Options.CreateDir != false)
-				{
-					if(Options.CreateDir == null)
-					{
-						Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", Options.OutputDir);
-						var key = Console.ReadKey();
-						Console.WriteLine();
-						if(key.Key == ConsoleKey.Y) Options.CreateDir = true;
-					}
+				state.FullOutputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("d"));
+				state.OutputDir = state.FullOutputPath;
 
-					if(Options.CreateDir == true)
-					{
-						if(Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
-						if(Options.DryRun == false) Directory.CreateDirectory(Options.OutputDir);
-					}
+				if(Directory.Exists(state.FullOutputPath)==false)
+				{
+					if(Options.DryRun == false) Directory.CreateDirectory(state.FullOutputPath);
 				}
 			}
+			else
+			{
+				if(Options.OutputDir != null && Directory.Exists(Options.OutputDir) == false)
+				{
+					if(Options.CreateDir != false)
+					{
+						if(Options.CreateDir == null)
+						{
+							Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", Options.OutputDir);
+							var key = Console.ReadKey();
+							Console.WriteLine();
+							if(key.Key == ConsoleKey.Y) Options.CreateDir = true;
+						}
 
-			state.OutputDir = Options.OutputDir ?? ".";
+						if(Options.CreateDir == true)
+						{
+							if(Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
+							if(Options.DryRun == false) Directory.CreateDirectory(Options.OutputDir);
+						}
+					}
 
-			state.FullOutputPath = Path.GetFullPath(state.OutputDir);
+				}
 
+				state.OutputDir = Options.OutputDir ?? ".";
+
+				state.FullOutputPath = Path.GetFullPath(state.OutputDir);
+			}
 		}
 	}
 }

@@ -128,6 +128,10 @@ namespace CPCodeSyncronize
 			{
 				Console.WriteLine("Writing files to path '{0}'.", state.FullOutputPath);
 			}
+			if(Options.Scratch)
+			{
+				Console.WriteLine("Writing files to scratch path '{0}'.", state.FullOutputPath);
+			}
 
 			bool writeTally = (Options.Verbose == false && Options.Quiet == false);
 			
@@ -155,7 +159,10 @@ namespace CPCodeSyncronize
 			else
 				filepath = name.Replace("/", "\\");
 
-			EnsureDirectories(filepath, basepath);
+			if(Options.DryRun == false)
+			{
+				DirectoryUtil.EnsureDirectories(filepath, basepath);
+			}
 
 			string fullpath = Path.Combine(basepath, filepath);
 
@@ -231,33 +238,7 @@ namespace CPCodeSyncronize
 
 		}
 
-		void EnsureDirectories(string filepath, string basepath)
-		{
-			if (Options.DryRun) return;
-			if (string.IsNullOrEmpty(basepath)) basepath = ".\\";
-			if (Directory.Exists(basepath) == false) throw new InvalidOperationException("basepath doesn't exist");
-
-			string[] segments = filepath.Split('\\');
-
-			int index = 0;
-			int segmentsLengthMinusOne = segments.Length - 1;
-
-			while (index < segmentsLengthMinusOne)
-			{
-				string directorypath = Path.Combine(basepath, String.Join("\\", segments.Take(index + 1)));
-				index++;
-
-				try
-				{
-					if (Directory.Exists(directorypath) == false)
-					{
-						Directory.CreateDirectory(directorypath);
-					}
-				}
-				catch { throw; }
-			}
-		}
-
+		
 	}
 
 }
