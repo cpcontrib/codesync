@@ -21,6 +21,9 @@ namespace ConsoleApplication1
 		[Option('v', "verbose")]
 		public bool Verbose { get;set; }
 
+		[Option('q', "quiet", DefaultValue=false)]
+		public bool Quiet { get; set; }
+
 		[Option('d', "dryrun")]
 		public bool DryRun { get;set; }
 

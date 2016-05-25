@@ -44,7 +44,7 @@ namespace ConsoleApplication1
 
 					if (Options.CreateDir == true)
 					{
-						if (Options.Verbose) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
+						if (Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
 						if (Options.DryRun == false) Directory.CreateDirectory(Options.OutputDir);
 					}
 				}
@@ -71,11 +71,12 @@ namespace ConsoleApplication1
 			{
 				Console.WriteLine("OutputDir: {0}", outputDir);
 			}
-
-			if (Options.Verbose)
+			
+			if(Options.Quiet != true)
 			{
 				Console.WriteLine("Output Directory: {0}", Options.OutputDir);
 			}
+
 			WriteFiles(filename, outputDir);
 		}
 
