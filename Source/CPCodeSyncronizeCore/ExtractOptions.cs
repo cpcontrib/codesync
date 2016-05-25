@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using CommandLine;
 
-namespace ConsoleApplication1
+namespace CPCodeSyncronize
 {
 
 	public class ExtractOptions

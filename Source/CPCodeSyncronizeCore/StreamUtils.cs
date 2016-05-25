@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ConsoleApplication1
+namespace CPCodeSyncronize
 {
 	internal class StreamUtils
 	{

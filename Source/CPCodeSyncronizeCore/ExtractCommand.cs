@@ -6,21 +6,46 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ConsoleApplication1
+namespace CPCodeSyncronize
 {
-	public class ExtractCommand
+	public class ExtractCommand : ICommand
 	{
 
-		public ExtractOptions Options;
+		private ExtractOptions Options;
+		void ICommand.SetOptions(object value)
+		{
+			this.Options = (ExtractOptions)value;
+		}
 
+		private int executestate = 0;
 		public void PreExecute()
 		{
-
+			executestate = 1;
+			try
+			{
+				CPCodeSyncronize.Core.ExtractCommandBuilder builder = new Core.ExtractCommandBuilder();
+				this.state = builder.ReadOptions(this.Options);
+				executestate = 2;
+			}
+			catch
+			{
+				executestate = 3; throw;
+			}
 		}
+
+		public class ExtractState
+		{
+			public string OutputDir;
+			public string FullOutputPath;
+			public string InputFile;
+			public bool InputFromWeb;
+		}
+
+		private ExtractState state;
 
 		public void Execute()
 		{
-			string filename;
+			if(executestate < 2) PreExecute();
 
 			//temp hack for listing
 			if(Options.List==true)
@@ -29,55 +54,7 @@ namespace ConsoleApplication1
 				return;
 			}
 
-			string fullUri = Options.InputFile;// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
-			if (Options.OutputDir != null && Directory.Exists(Options.OutputDir) == false)
-			{
-				if (Options.CreateDir != false)
-				{
-					if (Options.CreateDir == null)
-					{
-						Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", Options.OutputDir);
-						var key = Console.ReadKey();
-						Console.WriteLine();
-						if (key.Key == ConsoleKey.Y) Options.CreateDir = true;
-					}
-
-					if (Options.CreateDir == true)
-					{
-						if (Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
-						if (Options.DryRun == false) Directory.CreateDirectory(Options.OutputDir);
-					}
-				}
-			}
-
-			if (fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
-			{
-				filename = fullUri.Substring(fullUri.LastIndexOf("/") + 1);
-				if (File.Exists(filename) == false)
-				{
-
-					System.Net.WebClient wc = new System.Net.WebClient();
-					wc.DownloadFile(fullUri, filename);
-				}
-			}
-			else
-			{
-				filename = Options.InputFile;
-			}
-
-			string outputDir = Path.GetFullPath(Options.OutputDir ?? ".");
-
-			if(Options.Verbose && String.IsNullOrEmpty(Options.OutputDir) == false)
-			{
-				Console.WriteLine("OutputDir: {0}", outputDir);
-			}
-			
-			if(Options.Quiet != true)
-			{
-				Console.WriteLine("Output Directory: {0}", Options.OutputDir);
-			}
-
-			WriteFiles(filename, outputDir);
+			WriteFiles(state.InputFile, state.FullOutputPath);
 		}
 
 
@@ -147,6 +124,11 @@ namespace ConsoleApplication1
 		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
+			if(Options.Verbose)
+			{
+				Console.WriteLine("Writing files to path '{0}'.", state.FullOutputPath);
+			}
+
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
@@ -156,7 +138,7 @@ namespace ConsoleApplication1
 				if(Options.Verbose==false) Console.Write("Wrote {0} files\r", count);
 			}
 
-			if(Options.Verbose == false) Console.WriteLine();
+			if(Options.Verbose == false && Options.Quiet == false) Console.WriteLine();
 		}
 
 
@@ -273,5 +255,7 @@ namespace ConsoleApplication1
 				catch { throw; }
 			}
 		}
+
 	}
+
 }

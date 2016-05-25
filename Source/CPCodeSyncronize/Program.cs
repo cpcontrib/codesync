@@ -10,6 +10,8 @@ using System.Diagnostics;
 
 namespace ConsoleApplication1
 {
+	using CPCodeSyncronize;
+
 	class Program
 	{
 
@@ -36,8 +38,8 @@ namespace ConsoleApplication1
 
 			//ScanElementsPath(filename, Options);
 
-			ExtractCommand cmd = new ExtractCommand();
-			cmd.Options = Options;
+			ICommand cmd = new ExtractCommand();
+			cmd.SetOptions(Options);
 			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ cmd.Execute(); } );
 
 			Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));

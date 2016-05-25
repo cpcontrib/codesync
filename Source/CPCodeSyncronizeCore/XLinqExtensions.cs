@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace ConsoleApplication1
+namespace CPCodeSyncronize
 {
 	public static class XLinqExtensions
 	{
