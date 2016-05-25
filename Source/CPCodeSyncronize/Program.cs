@@ -26,6 +26,14 @@ namespace ConsoleApplication1
 			//});
 			Options.InputFile = args[0];
 
+			if(Options.Quiet == false)
+			{
+				Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+				Console.WriteLine("cpcodesync v{0} (C)Copyright Lightmaker Inc.", v);
+				
+				Console.WriteLine("\tUsage: cpcodesync [verb] [options...]");
+			}
+
 			//ScanElementsPath(filename, Options);
 
 			ExtractCommand cmd = new ExtractCommand();
