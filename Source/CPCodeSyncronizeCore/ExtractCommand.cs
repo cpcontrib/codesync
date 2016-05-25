@@ -67,17 +67,14 @@ namespace ConsoleApplication1
 
 			string outputDir = Path.GetFullPath(Options.OutputDir ?? ".");
 
+			if(Options.Verbose && String.IsNullOrEmpty(Options.OutputDir) == false)
 			{
-				Options.OutputDir = Path.GetDirectoryName(filename);
-				if (Options.OutputDir == "")
-				{
-					Options.OutputDir = ".\\";
-				}
+				Console.WriteLine("OutputDir: {0}", outputDir);
 			}
 
 			if (Options.Verbose)
 			{
-				Console.WriteLine("OutputDir: {0}", Options.OutputDir);
+				Console.WriteLine("Output Directory: {0}", Options.OutputDir);
 			}
 			WriteFiles(filename, outputDir);
 		}
@@ -154,10 +151,11 @@ namespace ConsoleApplication1
 			{
 				WriteFile(filenode, outputDir);
 				count++;
-				if(Options.Verbose==false)
-					Console.Write("{0} files\r", count);
 				
+				if(Options.Verbose==false) Console.Write("Wrote {0} files\r", count);
 			}
+
+			if(Options.Verbose == false) Console.WriteLine();
 		}
 
 

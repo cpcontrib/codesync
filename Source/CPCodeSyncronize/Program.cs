@@ -32,7 +32,6 @@ namespace ConsoleApplication1
 			cmd.Options = Options;
 			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ cmd.Execute(); } );
 
-			if(Options.Verbose==false) Console.WriteLine();
 			Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));
 
 			if(Debugger.IsAttached) {
