@@ -65,7 +65,8 @@ namespace ConsoleApplication1
 				filename = Options.InputFile;
 			}
 
-			if (Options.OutputDir == null)
+			string outputDir = Path.GetFullPath(Options.OutputDir ?? ".");
+
 			{
 				Options.OutputDir = Path.GetDirectoryName(filename);
 				if (Options.OutputDir == "")
@@ -78,7 +79,7 @@ namespace ConsoleApplication1
 			{
 				Console.WriteLine("OutputDir: {0}", Options.OutputDir);
 			}
-			WriteFiles(filename);
+			WriteFiles(filename, outputDir);
 		}
 
 
@@ -144,14 +145,14 @@ namespace ConsoleApplication1
 		}
 
 
-		void WriteFiles(string filename)
+		void WriteFiles(string filename, string outputDir)
 		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(filenode, Options.OutputDir);
+				WriteFile(filenode, outputDir);
 				count++;
 				if(Options.Verbose==false)
 					Console.Write("{0} files\r", count);
