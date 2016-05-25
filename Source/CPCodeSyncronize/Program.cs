@@ -28,7 +28,7 @@ namespace ConsoleApplication1
 			//});
 			Options.InputFile = args[0];
 
-			if(Options.Quiet == false)
+			if(Options.Quiet == false && Options.Porcelain == false)
 			{
 				Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 				Console.WriteLine("cpcodesync v{0} (C)Copyright Lightmaker Inc.", v);
@@ -40,9 +40,14 @@ namespace ConsoleApplication1
 
 			ICommand cmd = new ExtractCommand();
 			cmd.SetOptions(Options);
+
+			//start the command
 			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ cmd.Execute(); } );
 
-			Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));
+			if(Options.Quiet == false && Options.Porcelain == false)
+			{
+				Console.WriteLine("Completed in {0:0.00} secs", ((float)writefilesTimeSpan.TotalMilliseconds / (float)1000));
+			}
 
 			if(Debugger.IsAttached) {
 				System.Threading.Tasks.Task.Factory.StartNew(() => Console.ReadKey()).Wait(TimeSpan.FromSeconds(10));

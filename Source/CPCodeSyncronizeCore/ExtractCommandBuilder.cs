@@ -13,6 +13,12 @@ namespace CPCodeSyncronize.Core
 		{
 			var state = new CPCodeSyncronize.ExtractCommand.ExtractState();
 
+			if(Options.Porcelain)
+			{
+				Options.Quiet = true;
+				Options.Verbose = false;
+			}
+
 			ReadInputFile(Options, ref state);
 			ReadOutputDir(Options, ref state);
 
@@ -54,6 +60,11 @@ namespace CPCodeSyncronize.Core
 				if(Directory.Exists(state.FullOutputPath)==false)
 				{
 					if(Options.DryRun == false) Directory.CreateDirectory(state.FullOutputPath);
+				}
+
+				if(Options.Porcelain)
+				{
+					Console.WriteLine("CS0005: Writing to scratch directory=\"{0}\"", state.FullOutputPath);
 				}
 			}
 			else

@@ -33,6 +33,9 @@ namespace CPCodeSyncronize
 		[Option('s', "scratch")]
 		public bool Scratch { get; set; }
 
+		[Option('p', "porcelain")]
+		public bool Porcelain { get; set; }
+
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
 
