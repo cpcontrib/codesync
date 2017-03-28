@@ -137,7 +137,7 @@ namespace CPCodeSyncronize
 
 		private void ListFiles()
 		{
-			var codeFileNodes = LoadFromFile(Options.InputFile);
+			var codeFileNodes = LoadFromFile(state.InputFile);
 
 			int count = 0;
 			foreach(var node in codeFileNodes)
