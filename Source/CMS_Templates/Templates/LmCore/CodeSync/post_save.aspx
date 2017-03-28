@@ -35,72 +35,41 @@
 	{
 		try
 		{
-			var orig = new System./**/IO.MemoryStream();
 
-			using(var gz = new System./**/IO.Compression.GZipStream(orig, System./**/IO.Compression.CompressionMode.Compress))
+			XmlTextWriter xmlwriter = new XmlTextWriter(indented:true);
 			{
+				xmlwriter.WriteStartElement("CodeLibrary");
 
-				using(var sw = new System./**/IO.StreamWriter(gz, Encoding.UTF8))
-				{
-					XmlTextWriter xmlwriter = new XmlTextWriter(sw);
-					{
-						xmlwriter.WriteStartElement("CodeLibrary");
+				WriteFolderAndChildren(xmlwriter);
 
-						foreach(string basepath in Paths)
-						{
-							Asset folder = Asset.Load(basepath);
-
-							WriteFolderAndChildren(folder, true, xmlwriter);
-						}
-
-						xmlwriter.WriteEndElement();//sb.Append("</codeLibrary>");
-					}
-
-					//asset.SaveContentField("CodeLibrary", target.ToString());
-				}
+				xmlwriter.WriteEndElement();
 			}
-
-			//byte[] bytes = Encoding.UTF8.GetBytes("<test><node1>Test</node1></test>");
-			//ms = new System./**/IO.MemoryStream(bytes);
-			
-			//System. Net.Mail.MailMessage msg = new System. Net.Mail.MailMessage(context.ClientName + "@cms.crownpeak.com", asset["mail_to"]);
-
-			//msg.Attachments.Add(CreateAttachmentFromText(sw, "content.xml", "text/xml"));
-			//msg.Attachments.Add(CreateAttachmentFromBytes(ms.ToArray(), context.ClientName + "-codelibrary.xml.gz", "application/x-gzip"));
-			//var attachment1 = CreateAttachmentFromBytes(orig.ToArray(), context.ClientName + "-codelibrary.xml.gz", "application/x-gzip");
 
 			Log.Info("attachment created.");
 
-			Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
-			
-			//Util.Email("CodeSync", sb.ToString(), asset["mail_to"], context.ClientName + "@cms.crownpeak.com", CrownPeak.CMSAPI.ContentType.TextPlain);
+			var bytes = Encoding.UTF8.GetBytes(xmlwriter.ToString());
+
+			//Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
+
 			//PostHttpParams postHttpParams = this.CreateMultipartFormUpload(attachment1);
 
 			Log.Info("posting http");
 			//Util.PostHttp("http://cputil.lightmakerusa.com/codesync/api/upload/library", postHttpParams);
 
 			var wc = new System./**/Net.WebClient();
-			wc.UploadData("http://cputil.lightmakerusa.com/codesync/api/upload/library/"+context.ClientName, "POST", orig.ToArray());
+			//if(Log.IsDebugEnabled)
+			//{
+			//	wc.UploadProgressChanged += delegate(object sender, System.Net.UploadProgressChangedEventArgs e)
+			//	{
+			//		Log.Debug("Bytes sent={0} Progress={1}", e.BytesSent, e.ProgressPercentage);
+			//	};
+			//}
+			//wc.Headers.Set("Content-Type", "application/x-gzip");
+			wc.Headers.Set("Content-Type", "application/octet-stream");
+			wc.UploadData("http://cputil.lightmakerusa.com/codesync/api/upload/library/"+context.ClientName, "POST", bytes);
 					
-			//System./**/Net.WebRequest req = System./**/Net.HttpWebRequest.Create("http://cputil.lightmakerusa.com/codesync/api/upload/library");
-			//req.Method = "POST";
-			//foreach(var h in postHttpParams.Headers) 
-			//{
-			//	if(h.StartsWith("Content-Type", StringComparison.OrdinalIgnoreCase) || h.StartsWith("Content-Length", StringComparison.OrdinalIgnoreCase)) continue;
-			//	req.ContentLength = postHttpParams.PostData.Length;
-			//	req.Headers.Add(h);
-			//}
-
-			//using(var resp = req.GetResponse())
-			//{
-			//	Log.Debug(string.Format("resp.contentlength={0}", resp.ContentLength));
-			//}
-			
-				
 			Log.Info("msg sent.");
 
-			asset.DeleteContentField("mail_to");
-			
 		}
 		catch (Exception ex)
 		{
@@ -111,15 +80,15 @@
 			Log.Debug("clearing mail_to field.");
 			asset.SaveContentField("mail_to", null);
 			asset.SaveContentField("modified_since", beganRunning.ToString("O"));
-			
-			asset.SaveContentField("log", Log.GetLog());
+
+			asset.SaveContentField("log", "");//Log.GetLog());
 			Log.Flush();
 		}
 	}
 %>
 
 <script runat="server" data-cpcode="true">
-//Logger Log = LogManager.GetCurrentClassLogger(); 
+
 	EmailLogger Log;
 	
 	DateTime? ModifiedSince;
@@ -134,25 +103,31 @@
 	bool skipFoldersUnderscore = true;
 	bool skipFilesUnderscore = false;
 	
+	void WriteFolderAndChildren(XmlTextWriter xmlwriter)
+	{
+		foreach(string basepath in Paths)
+		{
+			Asset folder = Asset.Load(basepath);
 
+			WriteFolderAndChildren(folder, true, xmlwriter);
+		}
+	}
+	
+	private class AssetPathComparer : IComparer<AssetPath>
+	{
+
+		public int Compare(AssetPath x, AssetPath y)
+		{
+			return string.Compare(x.ToString(), y.ToString(), true);
+		}
+	}
+	
 	void WriteFolderAndChildren(Asset folder, bool deep, XmlTextWriter xmlwriter)
 	{
-		Log.Info("Folder '{0}'.", folder.AssetPath);
+		if(ProcessFolderNode(folder) == false) return;
 
-		//evaluate skip rules
-		//if(skipFoldersUnderscore && folder.AssetPath.Last().StartsWith("_"))
-		//{
-		//	Log.Info("skipping because of underscore: '{0}'", folder.AssetPath.Last());
-		//	return;
-		//}
-		if(PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
-		{
-			Log.Info("skipping because of PathsIgnore", folder.AssetPath);
-			return;
-		}
-
-		AssetParams p = new AssetParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
-		List<Asset> assetsInFolder = folder.GetFileList(p).OrderBy(_ => _.Label).ToList();
+		FilterParams p = new FilterParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
+		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_=>_.AssetPath,new AssetPathComparer()).ToList();
 		
 		Log.Debug("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
 		
@@ -170,10 +145,11 @@
 			//    Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
 			//    skip = true;
 			//}
-			if (skip == false) WriteFileNode(asset1, xmlwriter);
+			if (skip == false && asset1.IsFile==true) 
+				WriteFileNode(asset1, xmlwriter);
 		}
 
-		if (deep)
+		if (false) //deep)
 		{
 			foreach (Asset folder2 in folder.GetFolderList())
 			{
@@ -182,29 +158,56 @@
 		}
 	}
 	
-	bool CheckForIgnored(Asset asset1)
+	bool ProcessFolderNode(Asset folder)
 	{
-		string assetpathstr = asset1.AssetPath.ToString().Replace("/" + asset1.Label, "");
-		for(int i=0; i < PathsIgnore.Count(); i++)
+		bool process;
+		string msg = string.Format("Folder '{0}'.", folder.AssetPath);
+		
+		//evaluate skip rules
+		//if(skipFoldersUnderscore && folder.AssetPath.Last().StartsWith("_"))
+		//{
+		//	Log.Info("Folder '{0}': skipping because of underscore: '{1}'", folder.AssetPath, folder.AssetPath.Last());
+		//	return;
+		//}
+		if(PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
 		{
-			if (assetpathstr.StartsWith(PathsIgnore[i], StringComparison.InvariantCultureIgnoreCase))
-				return true;
+			msg += string.Format(": skipping because of PathsIgnore", folder.AssetPath);
+			process = false;
 		}
-		return false;
+		else
+		{
+			process = true;
+		}
+
+		Log.Info(msg);
+		return process;
 	}
 
-	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter) 
+	bool ProcessFileNode(Asset asset)
 	{
-		if(asset == null) throw new ArgumentNullException("asset");
-		
-		Log.Debug("File: {0}", asset.AssetPath);
-		
+		bool process;
+		string msg = string.Format("File: {0}", asset.AssetPath);
+
 		//evaluate skip rules
 		if(skipFilesUnderscore && asset.AssetPath.Last().StartsWith("_"))
 		{
-			Log.Debug("skipping because of underscore '{0}'", asset.AssetPath.Last());
-			return;
+			msg += string.Format(": skipping because of underscore '{0}'", asset.AssetPath.Last());
+			process = false;
 		}
+		else
+		{
+			process = true;
+		}
+
+		Log.Info(msg);
+		return process;
+	}
+	
+	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter) 
+	{
+		if(asset == null) throw new ArgumentNullException("asset");
+
+		if(ProcessFileNode(asset) == false) return;
 		
 		try
 		{
