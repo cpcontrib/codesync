@@ -38,8 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CMSAPIProxy">
-      <HintPath>..\..\packages\CrownPeak.CMSAPIProxy.1.0.0\lib\net40\CMSAPIProxy.dll</HintPath>
+    <Reference Include="CMSAPIProxy, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CrownPeak.CMSAPIProxy.1.1.0.6335\lib\CMSAPIProxy.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.DynamicData" />
