@@ -19,35 +19,62 @@ namespace CPCodeSyncronize.Core
 				Options.Verbose = false;
 			}
 
+			ReadInstance(Options, ref state);
 			ReadInputFile(Options, ref state);
 			ReadOutputDir(Options, ref state);
+
+			if(string.IsNullOrEmpty(state.FullOutputPath))
+			{
+				state.FullOutputPath = Path.GetFullPath(state.OutputDir);
+			}
 
 			return state;
 		}
 
+		private void ReadInstance(ExtractOptions Options, ref ExtractCommand.ExtractState state)
+		{
+			if(string.IsNullOrEmpty(Options.Instance)==false)
+			{
+				//set input file to configuration location default.
+				string inputFile = string.Format(@"\\dev01.lightmaker.us\web\cputil.lightmakerusa.com\codesync\App_Data\Uploads\{0}.xml", Options.Instance);
+
+				if(File.Exists(inputFile))
+				{
+					state.InputFile = inputFile;
+				}
+
+				//set output directory to current directory + instance name
+				state.OutputDir = string.Format(@".\{0}", Options.Instance);
+			}
+
+		}
+
 		private void ReadInputFile(ExtractOptions Options, ref CPCodeSyncronize.ExtractCommand.ExtractState state)
 		{
-			string fullUri = Options.InputFile;// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
-
-			string filename;
-			if(fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
+			if(string.IsNullOrEmpty(Options.InputFile) == false)
 			{
-				state.InputFromWeb = true;
+				string fullUri = Options.InputFile;// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
 
-				filename = fullUri.Substring(fullUri.LastIndexOf("/") + 1);
-				if(File.Exists(filename) == false)
+				string filename;
+				if(fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
 				{
+					state.InputFromWeb = true;
 
-					System.Net.WebClient wc = new System.Net.WebClient();
-					wc.DownloadFile(fullUri, filename);
+					filename = fullUri.Substring(fullUri.LastIndexOf("/") + 1);
+					if(File.Exists(filename) == false)
+					{
+
+						System.Net.WebClient wc = new System.Net.WebClient();
+						wc.DownloadFile(fullUri, filename);
+					}
 				}
-			}
-			else
-			{
-				filename = Options.InputFile;
-			}
+				else
+				{
+					filename = Options.InputFile;
+				}
 
-			state.InputFile = filename;
+				state.InputFile = filename;
+			}
 		}
 
 		private void ReadOutputDir(ExtractOptions Options, ref CPCodeSyncronize.ExtractCommand.ExtractState state)
@@ -91,9 +118,8 @@ namespace CPCodeSyncronize.Core
 				}
 
 				state.OutputDir = Options.OutputDir ?? ".";
-
-				state.FullOutputPath = Path.GetFullPath(state.OutputDir);
 			}
+
 		}
 	}
 }

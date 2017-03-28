@@ -9,6 +9,9 @@ namespace CPCodeSyncronize
 
 	public class ExtractOptions
 	{
+		[Option("instance", HelpText = "Instance name to pull file from. Uses configuration and current directory to read from and write to.")]
+		public string Instance { get; set; }
+
 		[Option("input", HelpText="Input codesync xml file for reading. Supports .gz internally.")]
 		public string InputFile { get;set;}
 
