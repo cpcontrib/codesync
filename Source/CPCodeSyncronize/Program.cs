@@ -50,7 +50,7 @@ namespace ConsoleApplication1
 			}
 
 			if(Debugger.IsAttached) {
-				System.Threading.Tasks.Task.Factory.StartNew(() => Console.ReadKey()).Wait(TimeSpan.FromSeconds(10));
+				System.Threading.Tasks.Task.Factory.StartNew(() => { Console.WriteLine("Debugger detected: Press any key to end."); Console.ReadKey(); }).Wait(TimeSpan.FromSeconds(10));
 			}
 		}
 
