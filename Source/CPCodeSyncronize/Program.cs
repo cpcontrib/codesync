@@ -26,7 +26,7 @@ namespace ConsoleApplication1
 			//	if(Debugger.IsAttached) Console.ReadKey();
 			//	Environment.Exit(1); 
 			//});
-			Options.InputFile = args[0];
+			//Options.InputFile = args[0];
 
 			if(Options.Quiet == false && Options.Porcelain == false)
 			{
