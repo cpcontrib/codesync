@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Library\Core_Classes.cs" />
     <Compile Include="Library\Core_Log.cs" />
+    <Compile Include="Library\_EmailLogger,0.9.0,EmailLogger.cs" />
     <Compile Include="Library\_XmlTextWriter%3bversion%3bXmlTextWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
