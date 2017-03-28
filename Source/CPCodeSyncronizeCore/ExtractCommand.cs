@@ -54,7 +54,84 @@ namespace CPCodeSyncronize
 				return;
 			}
 
-			WriteFiles(state.InputFile, state.FullOutputPath);
+			IDictionary<string,bool> existingFiles;
+			if(true)
+			{
+				existingFiles = ReadExistingFiles(state.FullOutputPath);
+			}
+
+			WriteFiles(state.InputFile, state.FullOutputPath, ref existingFiles);
+
+			if(true)
+			{
+				DeleteUnused(state.FullOutputPath, existingFiles);
+			}
+		}
+
+		private void DeleteUnused(string basepath, IDictionary<string, bool> existingFiles)
+		{
+			//throw new NotImplementedException();
+			var filesToDelete = existingFiles.AsEnumerable().Where(_ => _.Value == false);
+			
+			Options.Verbose = true;
+
+			if(Options.Quiet==false)
+			{
+				if(Options.Verbose==false)
+				{
+					Console.WriteLine("Deleting {0} files.", filesToDelete.Count());
+				}
+			}
+
+			foreach(var f in filesToDelete)
+			{
+				if(Options.Verbose)
+				{
+					Console.WriteLine("Deleting file {0}.", f.Key);
+				}
+				if(Options.DryRun == false)
+				{
+					string filepath = Path.Combine(basepath, f.Key);
+					try { /*File.Delete(filepath);*/ } catch { }
+				}
+
+			}
+		}
+
+		private IDictionary<string, bool> ReadExistingFiles(string fullPath, string relPath = null)
+		{
+			var dirInfo = new DirectoryInfo(fullPath);
+
+			IDictionary<string, bool> retVal = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+
+			ReadExistingFiles(dirInfo, null, ref retVal);
+
+			return retVal;
+		}
+
+		void ReadExistingFiles(DirectoryInfo dir, string relPath, ref IDictionary<string, bool> retVal)
+		{
+			var files = dir.GetFiles();
+			if(relPath != null)
+			{
+				retVal[relPath] = true;
+			}
+
+			foreach(var f in files)
+			{
+				string keyPath = relPath == null ? "" : Path.Combine(relPath, f.Name);
+				retVal[keyPath] = false;
+			}
+
+			var directories = dir.GetDirectories();
+			foreach(var subdir in directories)
+			{
+				if(subdir.Attributes == FileAttributes.Hidden) continue;
+				relPath = relPath == null ? subdir.Name : Path.Combine(relPath, subdir.Name);
+
+				ReadExistingFiles(subdir, relPath, ref retVal);
+			}
 		}
 
 
@@ -120,7 +197,7 @@ namespace CPCodeSyncronize
 		}
 
 
-		void WriteFiles(string filename, string outputDir)
+		void WriteFiles(string filename, string outputDir, ref IDictionary<string,bool> existingFiles)
 		{
 			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
 
@@ -138,7 +215,7 @@ namespace CPCodeSyncronize
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(filenode, outputDir);
+				WriteFile(filenode, outputDir, ref existingFiles);
 				count++;
 
 				if(writeTally) Console.Write("Wrote {0} files\r", count);
@@ -148,10 +225,9 @@ namespace CPCodeSyncronize
 		}
 
 
-		void WriteFile(XElement node, string basepath)
+		void WriteFile(XElement node, string basepath, ref IDictionary<string,bool> existingFiles)
 		{
 			string name = node.GetAttributeValue("Name");
-
 			string filepath;
 
 			if (name.StartsWith("/"))
@@ -167,6 +243,14 @@ namespace CPCodeSyncronize
 			string fullpath = Path.Combine(basepath, filepath);
 
 			WriteFileContent(node, basepath, fullpath);
+			if(existingFiles.ContainsKey(filepath) == false)
+			{
+				existingFiles[filepath] = true;
+			}
+			else
+			{
+				existingFiles[filepath] = true;
+			}
 
 			DateTime lastMod;
 			if(DateTime.TryParse(node.GetAttributeValue("lastMod"), out lastMod)==true)
