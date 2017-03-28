@@ -194,7 +194,8 @@ namespace CPCodeSyncronize
 						else
 							outputStream = new MemoryStream();
 
-						if (node.GetAttributeValue("Encoding") == "base64")
+						var nodeEncoding = node.GetAttributeValue("Encoding");
+						if (nodeEncoding == null || nodeEncoding == "base64")
 						{
 							byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
