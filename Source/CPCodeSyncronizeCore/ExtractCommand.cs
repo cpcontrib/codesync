@@ -47,13 +47,6 @@ namespace CPCodeSyncronize
 		{
 			if(executestate < 2) PreExecute();
 
-			//temp hack for listing
-			if(Options.List==true)
-			{
-				ListFiles();
-				return;
-			}
-
 			IDictionary<string,bool> existingFiles;
 			if(true)
 			{
@@ -135,18 +128,6 @@ namespace CPCodeSyncronize
 			}
 		}
 
-
-		private void ListFiles()
-		{
-			var codeFileNodes = LoadFromFile(state.InputFile);
-
-			int count = 0;
-			foreach(var node in codeFileNodes)
-			{
-				count++;
-				Console.WriteLine("{0}: {1}", count, node.Attribute("name").Value);
-			}
-		}
 
 		static IEnumerable<XElement> LoadFromFile(string filename)
 		{

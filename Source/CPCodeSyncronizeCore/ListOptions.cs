@@ -7,5 +7,9 @@ namespace CPCodeSyncronize
 {
 	public class ListOptions : CommonOptions
 	{
+
+		
+		public string InputFile { get; set; }
+
 	}
 }
