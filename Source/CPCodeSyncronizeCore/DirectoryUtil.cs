@@ -12,7 +12,7 @@ namespace CPCodeSyncronize
 		public static void EnsureDirectories(string filepath, string basepath)
 		{
 			if(string.IsNullOrEmpty(basepath)) throw new ArgumentException("basePath is empty.");
-			if(Directory.Exists(basepath) == false) throw new InvalidOperationException("basepath doesn't exist");
+			if(Directory.Exists(basepath) == false) Directory.CreateDirectory(basepath);
 
 			string[] segments = filepath.Split('\\');
 
