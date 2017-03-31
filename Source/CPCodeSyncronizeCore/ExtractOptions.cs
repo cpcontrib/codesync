@@ -21,11 +21,6 @@ namespace CPCodeSyncronize
 		[Option("createdir", HelpText="Create directory if neccesary")]
 		public bool? CreateDir { get;set; }
 
-
-
-		[Option('l', "list")]
-		public bool List { get;set; }
-
 		[Option('s', "scratch")]
 		public bool Scratch { get; set; }
 

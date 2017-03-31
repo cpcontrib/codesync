@@ -53,7 +53,8 @@ namespace CPCodeSyncronize
 				existingFiles = ReadExistingFiles(state.FullOutputPath);
 			}
 
-			WriteFiles(state.InputFile, state.FullOutputPath, ref existingFiles);
+			CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile);
+			WriteFiles(packageReader, state.FullOutputPath, ref existingFiles);
 
 			if(true)
 			{
@@ -91,97 +92,31 @@ namespace CPCodeSyncronize
 
 		private IDictionary<string, bool> ReadExistingFiles(string fullPath, string relPath = null)
 		{
-			var dirInfo = new DirectoryInfo(fullPath);
+			IDictionary<string, bool> existingFiles = null;
 
-			IDictionary<string, bool> retVal = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-
-			ReadExistingFiles(dirInfo, null, ref retVal);
-
-			return retVal;
-		}
-
-		void ReadExistingFiles(DirectoryInfo dir, string relPath, ref IDictionary<string, bool> retVal)
-		{
-			if(dir.Exists == true)
+			if(Directory.Exists(fullPath))
 			{
-				var files = dir.GetFiles();
-				if(relPath != null)
-				{
-					retVal[relPath] = true;
-				}
+				var files = Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories);
+				existingFiles = new Dictionary<string, bool>(files.Length, StringComparer.OrdinalIgnoreCase);
 
-				foreach(var f in files)
-				{
-					string keyPath = relPath == null ? "" : Path.Combine(relPath, f.Name);
-					retVal[keyPath] = false;
-				}
+				int fullpathSubstringIndex = fullPath.Length + 1;
 
-				var directories = dir.GetDirectories();
-				foreach(var subdir in directories)
+				foreach(var file in files)
 				{
-					if(subdir.Attributes == FileAttributes.Hidden) continue;
-					relPath = relPath == null ? subdir.Name : Path.Combine(relPath, subdir.Name);
-
-					ReadExistingFiles(subdir, relPath, ref retVal);
+					string shortened = file.Substring(fullpathSubstringIndex);
+					existingFiles.Add(shortened, false);
 				}
 			}
+
+			if(existingFiles == null) existingFiles = new Dictionary<string, bool>();
+
+			return existingFiles;
 		}
 
 
-		static IEnumerable<XElement> LoadFromFile(string filename)
+		void WriteFiles(CodeSyncPackageReader packageReader, string outputDir, ref IDictionary<string,bool> existingFiles)
 		{
-			Stream s = null;
-			try
-			{
-				s = File.OpenRead(filename);
-
-				if (filename.EndsWith(".gz"))
-				{
-					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
-				}
-
-				return StreamUtils.StreamElements(s, "CodeFile");
-				//XDocument xDoc = XDocument.Load(s); s.Close();
-				//return xDoc.Element("codeLibrary").Elements("codeFile");
-			}
-			finally
-			{
-
-			}
-		}
-
-		static Stream PrepareInputStream(byte[] contentBytes)
-		{
-			Stream inputStream = new MemoryStream(contentBytes);
-
-			if (contentBytes[0] == 0x1f && contentBytes[1] == 0x8b)
-			{
-				var gzip = new System.IO.Compression.GZipStream(inputStream, System.IO.Compression.CompressionMode.Decompress);
-
-				return gzip;
-			}
-
-			return inputStream;
-		}
-
-		static void ScanElementsPath(string filename, ExtractOptions options)
-		{
-			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
-
-			List<string> relPaths = new List<string>(100);
-
-			foreach (var filenode in codeFileElements)
-			{
-				relPaths.Add(filenode.Attribute("Name").Value);
-			}
-
-		}
-
-
-		void WriteFiles(string filename, string outputDir, ref IDictionary<string,bool> existingFiles)
-		{
-			IEnumerable<XElement> codeFileElements = LoadFromFile(filename);
+			IEnumerable<XElement> codeFileElements = packageReader.GetNodes();
 
 			if(Options.Verbose)
 			{
@@ -197,7 +132,7 @@ namespace CPCodeSyncronize
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(filenode, outputDir, ref existingFiles);
+				WriteFile(packageReader, filenode, outputDir, ref existingFiles);
 				count++;
 
 				if(writeTally) Console.Write("Wrote {0} files\r", count);
@@ -207,7 +142,7 @@ namespace CPCodeSyncronize
 		}
 
 
-		void WriteFile(XElement node, string basepath, ref IDictionary<string,bool> existingFiles)
+		void WriteFile(CodeSyncPackageReader packageReader, XElement node, string basepath, ref IDictionary<string,bool> existingFiles)
 		{
 			string name = node.GetAttributeValue("Name");
 			string filepath;
@@ -224,7 +159,8 @@ namespace CPCodeSyncronize
 
 			string fullpath = Path.Combine(basepath, filepath);
 
-			WriteFileContent(node, basepath, fullpath);
+			WriteFileContent(packageReader, node, basepath, fullpath);
+
 			if(existingFiles.ContainsKey(filepath) == false)
 			{
 				existingFiles[filepath] = true;
@@ -246,7 +182,7 @@ namespace CPCodeSyncronize
 
 		private static byte[] S_EmptyByteArray=new byte[0];
 
-		void WriteFileContent(XElement node, string basepath, string fullpath)
+		void WriteFileContent(CodeSyncPackageReader packageReader, XElement node, string basepath, string fullpath)
 		{
 			try
 			{
@@ -260,27 +196,7 @@ namespace CPCodeSyncronize
 						else
 							outputStream = new MemoryStream();
 
-						var nodeEncoding = node.GetAttributeValue("Encoding");
-						if (nodeEncoding == null || nodeEncoding == "base64")
-						{
-							byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
-
-							using (Stream inputStream = PrepareInputStream(base64contentgzip))
-							{
-								int bytesRead = -1;
-								do
-								{
-									bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
-									if (Options.DryRun == false) outputStream.Write(base64contentgzip, 0, bytesRead);
-								} while (bytesRead > 0);
-							}
-						}
-						else
-						{ 
-							StreamWriter  sw=new StreamWriter(outputStream);
-							sw.Write(node.Value.Trim());
-							sw.Flush();
-						}
+						packageReader.WriteNodeValueToStream(node, outputStream);
 
 						outputStream.Flush();
 					}
