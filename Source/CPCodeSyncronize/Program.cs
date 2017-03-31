@@ -15,18 +15,34 @@ namespace ConsoleApplication1
 	class Program
 	{
 
-		static ExtractOptions Options;
-
 		static void Main(string[] args)
 		{
-			Options = new ExtractOptions();
-			CommandLine.Parser.Default.ParseArguments(args, Options); 
-			//, () => { 
-			//	CommandLine.Text.HelpText.AutoBuild(Options); 
-			//	if(Debugger.IsAttached) Console.ReadKey();
-			//	Environment.Exit(1); 
-			//});
-			//Options.InputFile = args[0];
+			string invokedVerb = null;
+			object invokedVerbInstance = null;
+
+			CommonOptions Options = new ExtractOptions();
+			ParserVerbs verbs = new ParserVerbs();
+			if(!CommandLine.Parser.Default.ParseArguments(args, verbs,
+			  (verb, subOptions) =>
+			  {
+				  // if parsing succeeds the verb name and correct instance
+				  // will be passed to onVerbCommand delegate (string,object)
+				  invokedVerb = verb;
+				  invokedVerbInstance = subOptions;
+			  }))
+			{
+				Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+			}
+
+			ICommand cmd = null;
+			switch(invokedVerb) 
+			{
+				case "extract":
+					cmd = new ExtractCommand();
+					cmd.SetOptions(invokedVerbInstance);
+					break;
+			}
+
 
 			if(Options.Quiet == false && Options.Porcelain == false)
 			{
@@ -37,9 +53,6 @@ namespace ConsoleApplication1
 			}
 
 			//ScanElementsPath(filename, Options);
-
-			ICommand cmd = new ExtractCommand();
-			cmd.SetOptions(Options);
 
 			//start the command
 			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ cmd.Execute(); } );

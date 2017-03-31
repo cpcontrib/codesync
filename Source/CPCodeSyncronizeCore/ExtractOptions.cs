@@ -7,7 +7,7 @@ using CommandLine;
 namespace CPCodeSyncronize
 {
 
-	public class ExtractOptions
+	public class ExtractOptions : CommonOptions
 	{
 		[Option("instance", HelpText = "Instance name to pull file from. Uses configuration and current directory to read from and write to.")]
 		public string Instance { get; set; }
@@ -21,23 +21,13 @@ namespace CPCodeSyncronize
 		[Option("createdir", HelpText="Create directory if neccesary")]
 		public bool? CreateDir { get;set; }
 
-		[Option('v', "verbose")]
-		public bool Verbose { get;set; }
 
-		[Option('q', "quiet", DefaultValue=false)]
-		public bool Quiet { get; set; }
-
-		[Option('d', "dryrun")]
-		public bool DryRun { get;set; }
 
 		[Option('l', "list")]
 		public bool List { get;set; }
 
 		[Option('s', "scratch")]
 		public bool Scratch { get; set; }
-
-		[Option('p', "porcelain")]
-		public bool Porcelain { get; set; }
 
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
