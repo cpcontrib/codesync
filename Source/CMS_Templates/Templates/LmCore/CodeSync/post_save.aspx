@@ -2,22 +2,28 @@
 <%@ Import Namespace="CrownPeak.CMSAPI" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
-<%@ Import Namespace="LMCP" Package="Lm.Core,1.0.0" %>
+<% //@Package=Lm.Core,1.0.0 %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
 	Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"eric.newton@lightmaker.com");
-	Log.IsDebugEnabled = asset.Raw["IsDebugEnabled"]=="true";
+	Log.IsDebugEnabled = true;// asset.Raw["IsDebugEnabled"] == "true";
 	
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
 	asset.DeleteContentField("log");
 
 	if(asset["skip_package_sources"] == "true")
 		skipFilesUnderscore = true;
-	
-	if (string.IsNullOrEmpty(asset.Raw["paths_include"]) == false)
+
+	if(string.IsNullOrEmpty(asset.Raw["paths_include"]) == false)
+	{
+		Paths.Clear();
 		Paths.AddRange(asset.Raw["paths_include"].Split('\n').Select(_ => _.Trim()));
-	if (string.IsNullOrEmpty(asset.Raw["paths_exclude"]) == false)
-		PathsIgnore.AddRange(asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim()));
+	}
+	if(string.IsNullOrEmpty(asset.Raw["paths_exclude"]) == false)
+	{
+		PathsIgnore.Clear();
+		PathsIgnore.AddRange(asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim())); //Globber.RegexGlob(_.Trim())));
+	}
 		 
 	Log.Debug("Paths: {0}", String.Join("|", Paths));
 	Log.Debug("PathsIgnore: {0}", String.Join("|", PathsIgnore));
@@ -30,13 +36,14 @@
 	DateTime beganRunning = DateTime.UtcNow;
 
 	Log.Debug("starting");
-	
-	if (string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+
+	try
 	{
-		try
+		if(string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
 		{
 
-			XmlTextWriter xmlwriter = new XmlTextWriter(indented:true);
+
+			XmlTextWriter xmlwriter = new XmlTextWriter(indented: true);
 			{
 				xmlwriter.WriteStartElement("CodeLibrary");
 
@@ -66,24 +73,23 @@
 			//}
 			//wc.Headers.Set("Content-Type", "application/x-gzip");
 			wc.Headers.Set("Content-Type", "application/octet-stream");
-			wc.UploadData("http://cputil.lightmakerusa.com/codesync/api/upload/library/"+context.ClientName, "POST", bytes);
-					
+			wc.UploadData("http://cputil.lightmakerusa.com/codesync/api/upload/library/" + context.ClientName, "POST", bytes);
+
 			Log.Info("msg sent.");
+		}
+	}
+	catch(Exception ex)
+	{
+		Log.Error(ex, "Exception occurred");
+	}
+	finally
+	{
+		Log.Debug("clearing mail_to field.");
+		asset.SaveContentField("mail_to", null);
+		asset.SaveContentField("modified_since", beganRunning.ToString("O"));
 
-		}
-		catch (Exception ex)
-		{
-			Log.Error(ex, "Exception occurred");
-		}
-		finally
-		{
-			Log.Debug("clearing mail_to field.");
-			asset.SaveContentField("mail_to", null);
-			asset.SaveContentField("modified_since", beganRunning.ToString("O"));
-
-			asset.SaveContentField("log", "");//Log.GetLog());
-			Log.Flush();
-		}
+		asset.SaveContentField("log", "");//Log.GetLog());
+		Log.Flush();
 	}
 %>
 
@@ -94,11 +100,12 @@
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
-	List<string> PathsIgnore = new List<string>() { 
-		"/System/Templates/AdventGeneral",
-		"/System/Templates/Simple Site CSharp",
-		"/System/Templates/Simple Site"
-	};
+	List<string> PathsIgnore = new List<string>();// { 
+	//	"/System/Templates/AdventGeneral",
+	//	"/System/Templates/Simple Site CSharp",
+	//	"/System/Templates/Simple Site"
+	//};
+	//List<Regex> PathsIgnore = new List<Regex>();
 
 	bool skipFoldersUnderscore = true;
 	bool skipFilesUnderscore = false;
@@ -127,26 +134,44 @@
 		if(ProcessFolderNode(folder) == false) return;
 
 		FilterParams p = new FilterParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
+
 		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_=>_.AssetPath,new AssetPathComparer()).ToList();
 		
 		Log.Debug("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
 		
 		foreach (var asset1 in assetsInFolder)
 		{
-			bool skip = false;
+			string msg = string.Format("File:{0}", asset1.AssetPath.ToString());
+			try
+			{
+				bool skip = false;
+				if(ProcessFileNode(asset1) == false) skip = true;
 
-			//if (CheckForIgnored(asset1))//asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
-			//{
-			//    Out.DebugWriteLine("Ignoring asset '{0}'.", asset1.AssetPath.ToString());
-			//    skip = true;
-			//}
-			//if(false)
-			//{
-			//    Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
-			//    skip = true;
-			//}
-			if (skip == false && asset1.IsFile==true) 
-				WriteFileNode(asset1, xmlwriter);
+				//if (CheckForIgnored(asset1))//asset1.ModifiedDate > ModifiedSince.GetValueOrDefault())
+				//{
+				//    Out.DebugWriteLine("Ignoring asset '{0}'.", asset1.AssetPath.ToString());
+				//    skip = true;
+				//}
+				//if(false)
+				//{
+				//    Out.DebugWriteLine("Skipping asset '{0}' ({1}) since modified date '{2}' < modified_since", asset1.Label, asset1.Id, asset1.ModifiedDate);
+				//    skip = true;
+				//}
+				if(skip == false && asset1.IsFile == true)
+					WriteFileNode(asset1, xmlwriter);
+
+				if(skip && Log.IsDebugEnabled)
+				{
+					msg += string.Format(" skip={0}", skip);
+					Log.Debug(msg);
+				}
+				else
+					Log.Info(msg);
+			}
+			catch(Exception ex)
+			{
+				Log.Error(ex, msg);
+			}
 		}
 
 		if (false) //deep)
@@ -160,8 +185,13 @@
 	
 	bool ProcessFolderNode(Asset folder)
 	{
-		bool process;
-		string msg = string.Format("Folder '{0}'.", folder.AssetPath);
+		return ProcessFolderNode(folder.AssetPath.ToString());
+	}
+	
+	bool ProcessFolderNode(string folderAssetPath)
+	{
+		bool process = true; //default is to process it
+		string msg = string.Format("Folder '{0}'.", folderAssetPath);
 		
 		//evaluate skip rules
 		//if(skipFoldersUnderscore && folder.AssetPath.Last().StartsWith("_"))
@@ -169,37 +199,46 @@
 		//	Log.Info("Folder '{0}': skipping because of underscore: '{1}'", folder.AssetPath, folder.AssetPath.Last());
 		//	return;
 		//}
-		if(PathsIgnore.Contains(folder.AssetPath.ToString(), StringComparer.OrdinalIgnoreCase))
-		{
-			msg += string.Format(": skipping because of PathsIgnore", folder.AssetPath);
-			process = false;
-		}
-		else
-		{
-			process = true;
-		}
 
-		Log.Info(msg);
+		foreach(var PathIgnoreSpec in PathsIgnore)
+		{
+			if(folderAssetPath.StartsWith(PathIgnoreSpec))
+			{
+				msg += string.Format(": skipping because of PathsIgnore", folderAssetPath);
+				process = false; break;
+			}
+			else
+			{
+				process = true;
+			}
+
+			Log.Info(msg);
+		}
+		
 		return process;
 	}
 
 	bool ProcessFileNode(Asset asset)
 	{
-		bool process;
-		string msg = string.Format("File: {0}", asset.AssetPath);
+		bool process = true;
+		string assetPathStr = asset.AssetPath.ToString();
+		//string msg = string.Format("FileCheck:{0}", assetPathStr);
 
 		//evaluate skip rules
 		if(skipFilesUnderscore && asset.AssetPath.Last().StartsWith("_"))
 		{
-			msg += string.Format(": skipping because of underscore '{0}'", asset.AssetPath.Last());
+			//msg += string.Format(": skipping because of underscore '{0}'", asset.AssetPath.Last());
 			process = false;
 		}
-		else
+		else 
 		{
-			process = true;
+			foreach(var ExcludePathSpec in this.PathsIgnore)
+			{
+				if(assetPathStr.StartsWith(ExcludePathSpec)) { process = false; break; }
+			}
 		}
 
-		Log.Info(msg);
+		//Log.Info(msg);
 		return process;
 	}
 	
