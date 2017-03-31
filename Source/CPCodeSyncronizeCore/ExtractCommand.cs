@@ -110,25 +110,28 @@ namespace CPCodeSyncronize
 
 		void ReadExistingFiles(DirectoryInfo dir, string relPath, ref IDictionary<string, bool> retVal)
 		{
-			var files = dir.GetFiles();
-			if(relPath != null)
+			if(dir.Exists == true)
 			{
-				retVal[relPath] = true;
-			}
+				var files = dir.GetFiles();
+				if(relPath != null)
+				{
+					retVal[relPath] = true;
+				}
 
-			foreach(var f in files)
-			{
-				string keyPath = relPath == null ? "" : Path.Combine(relPath, f.Name);
-				retVal[keyPath] = false;
-			}
+				foreach(var f in files)
+				{
+					string keyPath = relPath == null ? "" : Path.Combine(relPath, f.Name);
+					retVal[keyPath] = false;
+				}
 
-			var directories = dir.GetDirectories();
-			foreach(var subdir in directories)
-			{
-				if(subdir.Attributes == FileAttributes.Hidden) continue;
-				relPath = relPath == null ? subdir.Name : Path.Combine(relPath, subdir.Name);
+				var directories = dir.GetDirectories();
+				foreach(var subdir in directories)
+				{
+					if(subdir.Attributes == FileAttributes.Hidden) continue;
+					relPath = relPath == null ? subdir.Name : Path.Combine(relPath, subdir.Name);
 
-				ReadExistingFiles(subdir, relPath, ref retVal);
+					ReadExistingFiles(subdir, relPath, ref retVal);
+				}
 			}
 		}
 
