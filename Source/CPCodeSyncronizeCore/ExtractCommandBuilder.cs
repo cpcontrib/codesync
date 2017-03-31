@@ -20,8 +20,11 @@ namespace CPCodeSyncronize.Core
 			}
 
 			ReadInstance(Options, ref state);
-			ReadInputFile(Options, ref state);
-			ReadOutputDir(Options, ref state);
+			if(String.IsNullOrEmpty(Options.Instance))
+			{
+				ReadInputFile(Options, ref state);
+				ReadOutputDir(Options, ref state);
+			}
 
 			if(string.IsNullOrEmpty(state.FullOutputPath))
 			{
