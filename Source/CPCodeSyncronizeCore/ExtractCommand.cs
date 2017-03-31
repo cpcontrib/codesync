@@ -73,8 +73,6 @@ namespace CPCodeSyncronize
 			//throw new NotImplementedException();
 			var filesToDelete = existingFiles.AsEnumerable().Where(_ => _.Value == false);
 			
-			Options.Verbose = true;
-
 			if(Options.Quiet==false)
 			{
 				if(Options.Verbose==false)
