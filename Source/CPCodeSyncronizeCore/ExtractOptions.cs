@@ -29,5 +29,8 @@ namespace CPCodeSyncronize
 
 		//[ParserState]
 		//public IParserState LastParserState { get;set; }
+
+		[Option("sync", HelpText="Syncronize (mirror) the package",DefaultValue=true)]
+		public bool Sync { get; set; }
 	}
 }

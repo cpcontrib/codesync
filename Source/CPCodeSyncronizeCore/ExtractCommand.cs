@@ -47,11 +47,7 @@ namespace CPCodeSyncronize
 		{
 			if(executestate < 2) PreExecute();
 
-			IDictionary<string,bool> existingFiles;
-			if(true)
-			{
-				existingFiles = ReadExistingFiles(state.FullOutputPath);
-			}
+			IDictionary<string,bool> existingFiles = ReadExistingFiles(state.FullOutputPath);
 
 			CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile);
 			WriteFiles(packageReader, state.FullOutputPath, ref existingFiles);
@@ -94,7 +90,7 @@ namespace CPCodeSyncronize
 		{
 			IDictionary<string, bool> existingFiles = null;
 
-			if(Directory.Exists(fullPath))
+			if(Options.Sync && Directory.Exists(fullPath))
 			{
 				var files = Directory.GetFiles(fullPath, "*", SearchOption.AllDirectories);
 				existingFiles = new Dictionary<string, bool>(files.Length, StringComparer.OrdinalIgnoreCase);
