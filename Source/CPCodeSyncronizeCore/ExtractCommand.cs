@@ -49,12 +49,14 @@ namespace CPCodeSyncronize
 
 			IDictionary<string,bool> existingFiles = ReadExistingFiles(state.FullOutputPath);
 
-			CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile);
-			WriteFiles(packageReader, state.FullOutputPath, ref existingFiles);
-
-			if(true)
+			using(CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile))
 			{
-				DeleteUnused(state.FullOutputPath, existingFiles);
+				WriteFiles(packageReader, state.FullOutputPath, ref existingFiles);
+
+				if(Options.Sync)
+				{
+					DeleteUnused(state.FullOutputPath, existingFiles);
+				}
 			}
 		}
 

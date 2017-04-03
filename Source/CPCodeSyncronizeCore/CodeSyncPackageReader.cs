@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace CPCodeSyncronize
 {
-	public class CodeSyncPackageReader
+	public class CodeSyncPackageReader : IDisposable
 	{
 
 		public CodeSyncPackageReader(string packagePath)
@@ -91,6 +91,11 @@ namespace CPCodeSyncronize
 
 		}
 
+
+		public void Dispose()
+		{
+			
+		}
 	}
 
 }
