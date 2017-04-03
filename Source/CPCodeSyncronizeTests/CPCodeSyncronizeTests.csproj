@@ -41,9 +41,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeSyncLib\Class1.cs" />
+    <Compile Include="CodeSyncLib\CodeSyncPackageReaderTests.cs" />
     <Compile Include="CodeSyncLib\TraverserTests.cs" />
     <Compile Include="NUnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
