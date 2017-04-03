@@ -46,7 +46,7 @@ namespace CPCodeSyncronize
 			{
 				byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
 
-				using(Stream inputStream = PrepareInputStream(base64contentgzip))
+				using(Stream inputStream = GetReadableStream(base64contentgzip))
 				{
 					int bytesRead = -1;
 					do
@@ -64,7 +64,7 @@ namespace CPCodeSyncronize
 			}
 		}
 
-		public static Stream PrepareInputStream(byte[] contentBytes)
+		public Stream GetReadableStream(byte[] contentBytes)
 		{
 			Stream inputStream = new MemoryStream(contentBytes);
 
