@@ -12,10 +12,18 @@ namespace CPCodeSyncronize
 
 		public CodeSyncPackageReader(string packagePath)
 		{
+			if(packagePath == null) throw new ArgumentNullException("packagePath");
 			this.filename = packagePath;
+		}
+		public CodeSyncPackageReader(Stream inputStream)
+		{
+			if(inputStream == null) throw new ArgumentNullException("inputStream");
+			this.inputStream = inputStream;
 		}
 
 		string filename;
+		Stream inputStream;
+		bool ownsStream = false;
 
 		public IEnumerable<XElement> GetNodes()
 		{
