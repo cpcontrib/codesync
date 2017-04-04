@@ -82,7 +82,7 @@ namespace CPCodeSyncronize
 				if(Options.DryRun == false)
 				{
 					string filepath = Path.Combine(basepath, f.Key);
-					try { /*File.Delete(filepath);*/ } catch { }
+					try { File.Delete(filepath); } catch { }
 				}
 
 			}
