@@ -20,19 +20,31 @@ namespace ConsoleApplication1
 			string invokedVerb = null;
 			object invokedVerbInstance = null;
 
-			CommonOptions Options = new ExtractOptions();
+			CommonOptions Options = null;
+
 			ParserVerbs verbs = new ParserVerbs();
-			if(!CommandLine.Parser.Default.ParseArguments(args, verbs,
+			bool optionsParsed = CommandLine.Parser.Default.ParseArguments(args, verbs,
 			  (verb, subOptions) =>
 			  {
 				  // if parsing succeeds the verb name and correct instance
 				  // will be passed to onVerbCommand delegate (string,object)
 				  invokedVerb = verb;
 				  invokedVerbInstance = subOptions;
-			  }))
+				  Options = invokedVerbInstance as CommonOptions;
+			  });
+			
+			if(optionsParsed == false || (Options.Quiet == false && Options.Porcelain == false))
 			{
-				Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+				Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+				Console.WriteLine("cpcodesync v{0} (C)Copyright Lightmaker Inc.", v);
+
+				if(optionsParsed==false)
+				{
+					Console.WriteLine("\tUsage: cpcodesync [verb] [options...]");
+					Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+				}
 			}
+
 
 			ICommand cmd = null;
 			switch(invokedVerb) 
@@ -44,13 +56,6 @@ namespace ConsoleApplication1
 			}
 
 
-			if(Options.Quiet == false && Options.Porcelain == false)
-			{
-				Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-				Console.WriteLine("cpcodesync v{0} (C)Copyright Lightmaker Inc.", v);
-				
-				Console.WriteLine("\tUsage: cpcodesync [verb] [options...]");
-			}
 
 			//ScanElementsPath(filename, Options);
 
