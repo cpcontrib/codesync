@@ -5,6 +5,8 @@
 <% //@Package=Lm.Core,1.0.0 %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
+	string CodeSyncBaseUri = "https://codesync.cp-contrib.com";
+
 	Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"eric.newton@lightmaker.com");
 	Log.IsDebugEnabled = true;// asset.Raw["IsDebugEnabled"] == "true";
 	
@@ -25,8 +27,8 @@
 		PathsIgnore.AddRange(asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim())); //Globber.RegexGlob(_.Trim())));
 	}
 		 
-	Log.Debug("Paths: {0}", String.Join("|", Paths));
-	Log.Debug("PathsIgnore: {0}", String.Join("|", PathsIgnore));
+	Log.Info("Paths: {0}", String.Join("|", Paths));
+	Log.Info("PathsIgnore: {0}", String.Join("|", PathsIgnore));
 		
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
@@ -35,48 +37,41 @@
 
 	DateTime beganRunning = DateTime.UtcNow;
 
-	Log.Debug("starting");
+	Log.Info("starting");
 
 	try
 	{
-		if(string.IsNullOrWhiteSpace(asset["mail_to"]) == false)
+
+		XmlTextWriter xmlwriter = new XmlTextWriter(indented: true);
 		{
+			xmlwriter.WriteStartElement("CodeLibrary");
 
+			WriteFolderAndChildren(xmlwriter);
 
-			XmlTextWriter xmlwriter = new XmlTextWriter(indented: true);
-			{
-				xmlwriter.WriteStartElement("CodeLibrary");
-
-				WriteFolderAndChildren(xmlwriter);
-
-				xmlwriter.WriteEndElement();
-			}
-
-			Log.Info("attachment created.");
-
-			var bytes = Encoding.UTF8.GetBytes(xmlwriter.ToString());
-
-			//Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
-
-			//PostHttpParams postHttpParams = this.CreateMultipartFormUpload(attachment1);
-
-			Log.Info("posting http");
-			//Util.PostHttp("http://cputil.lightmakerusa.com/codesync/api/upload/library", postHttpParams);
-
-			var wc = new System./**/Net.WebClient();
-			//if(Log.IsDebugEnabled)
-			//{
-			//	wc.UploadProgressChanged += delegate(object sender, System.Net.UploadProgressChangedEventArgs e)
-			//	{
-			//		Log.Debug("Bytes sent={0} Progress={1}", e.BytesSent, e.ProgressPercentage);
-			//	};
-			//}
-			//wc.Headers.Set("Content-Type", "application/x-gzip");
-			wc.Headers.Set("Content-Type", "application/octet-stream");
-			wc.UploadData("http://cputil.lightmakerusa.com/codesync/api/upload/library/" + context.ClientName, "POST", bytes);
-
-			Log.Info("msg sent.");
+			xmlwriter.WriteEndElement();
 		}
+
+		Log.Info("attachment created.");
+
+		var bytes = Encoding.UTF8.GetBytes(xmlwriter.ToString());
+
+		//Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
+
+		//PostHttpParams postHttpParams = this.CreateMultipartFormUpload(attachment1);
+
+		string uploadUrl = CodeSyncBaseUri + "/api/upload/library/" + context.ClientName;
+
+		Log.Debug("posting data to '{0}'.", uploadUrl);
+		//Util.PostHttp(CodeSyncBaseUri+"/api/upload/library/" + context.ClientName, postHttpParams);
+
+		var wc = new System./**/Net.WebClient();
+
+		//wc.Headers.Set("Content-Type", "application/x-gzip");
+		wc.Headers.Set("Content-Type", "application/octet-stream");
+		wc.UploadData(uploadUrl, "POST", bytes);
+
+		Log.Info("Data uploaded to '{0}'.", uploadUrl);
+
 	}
 	catch(Exception ex)
 	{
@@ -84,11 +79,13 @@
 	}
 	finally
 	{
+		Log.Info("Completing process.");
+
 		Log.Debug("clearing mail_to field.");
 		asset.SaveContentField("mail_to", null);
 		asset.SaveContentField("modified_since", beganRunning.ToString("O"));
 
-		asset.SaveContentField("log", "");//Log.GetLog());
+		asset.SaveContentField("log", Log.GetLog());
 		Log.Flush();
 	}
 %>
@@ -137,7 +134,7 @@
 
 		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_=>_.AssetPath,new AssetPathComparer()).ToList();
 		
-		Log.Debug("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
+		Log.Info("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
 		
 		foreach (var asset1 in assetsInFolder)
 		{
@@ -166,7 +163,7 @@
 					Log.Debug(msg);
 				}
 				else
-					Log.Info(msg);
+					Log.Debug(msg);
 			}
 			catch(Exception ex)
 			{
@@ -304,7 +301,7 @@
 		}
 		else
 		{
-			Log.Debug("[user {0} not found on asset {1}]", asset.ModifiedUserId, asset.Id);
+			Log.Warn("[user {0} not found on asset {1}]", asset.ModifiedUserId, asset.Id);
 			modifiedByUserStr = "";
 		}
 
