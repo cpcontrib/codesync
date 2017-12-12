@@ -19,12 +19,10 @@ namespace CPCodeSyncronize.Core
 				Options.Verbose = false;
 			}
 
+			ReadInputFile(Options, ref state);
+			ReadOutputDir(Options, ref state);
+
 			ReadInstance(Options, ref state);
-			if(String.IsNullOrEmpty(Options.Instance))
-			{
-				ReadInputFile(Options, ref state);
-				ReadOutputDir(Options, ref state);
-			}
 
 			if(string.IsNullOrEmpty(state.FullOutputPath))
 			{
@@ -47,7 +45,8 @@ namespace CPCodeSyncronize.Core
 				}
 
 				//set output directory to current directory + instance name
-				state.OutputDir = string.Format(@".\{0}", Options.Instance);
+				if(String.IsNullOrEmpty(state.OutputDir))
+					state.OutputDir = string.Format(@".\{0}", Options.Instance);
 			}
 
 		}
@@ -105,7 +104,7 @@ namespace CPCodeSyncronize.Core
 					{
 						if(Options.CreateDir == null)
 						{
-							Console.Write("basepath '{0}' doesn't exist, would you like to create it? (y/n)", Options.OutputDir);
+							Console.Write("Directory '{0}' doesn't exist, would you like to create it? (y/n)", Path.GetFullPath(Options.OutputDir));
 							var key = Console.ReadKey();
 							Console.WriteLine();
 							if(key.Key == ConsoleKey.Y) Options.CreateDir = true;
@@ -113,14 +112,14 @@ namespace CPCodeSyncronize.Core
 
 						if(Options.CreateDir == true)
 						{
-							if(Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Options.OutputDir);
+							if(Options.Verbose && Options.Quiet == false) Console.WriteLine("Creating directory '{0}'.", Path.GetFullPath(Options.OutputDir));
 							if(Options.DryRun == false) Directory.CreateDirectory(Options.OutputDir);
 						}
 					}
 
 				}
 
-				state.OutputDir = Options.OutputDir ?? ".";
+				state.OutputDir = Options.OutputDir;
 			}
 
 		}
