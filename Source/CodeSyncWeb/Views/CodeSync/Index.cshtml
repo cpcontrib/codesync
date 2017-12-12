@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<form method="POST" enctype="multipart/form-data" action="@Url.Content("/api/upload/library/lightmaker")">
+
+	<div>Client Library: <input type="text" name="clientLibrary" /></div>
+	<div><input type="file" name="file1" /></div>
+	<div><input type="submit" value="Submit" /></div>
+
+	<script type="text/javascript">
+	$(document).ready(function() {
+		$("#clientLibrary").on("change", function() {
+
+		});
+	});
+	</script>
+
+</form>
