@@ -1,15 +1,12 @@
-﻿<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
+<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
 <%@ Import Namespace="CrownPeak.CMSAPI" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
 <% //@Package=Lm.Core,1.0.0 %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
-	string CodeSyncBaseUri = "https://codesync.cp-contrib.com";
+	Initialize();
 
-	Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"eric.newton@lightmaker.com");
-	Log.IsDebugEnabled = true;// asset.Raw["IsDebugEnabled"] == "true";
-	
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
 	asset.DeleteContentField("log");
 
@@ -47,35 +44,22 @@
 			xmlwriter.WriteStartElement("CodeLibrary");
 
 			WriteFolderAndChildren(xmlwriter);
+			WriteUserReferences(usersDictionary.Values, xmlwriter);
 
 			xmlwriter.WriteEndElement();
 		}
 
 		Log.Info("attachment created.");
 
-		var bytes = Encoding.UTF8.GetBytes(xmlwriter.ToString());
+		UploadToServer(xmlwriter);
 
-		//Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
-
-		//PostHttpParams postHttpParams = this.CreateMultipartFormUpload(attachment1);
-
-		string uploadUrl = CodeSyncBaseUri + "/api/upload/library/" + context.ClientName;
-
-		Log.Debug("posting data to '{0}'.", uploadUrl);
-		//Util.PostHttp(CodeSyncBaseUri+"/api/upload/library/" + context.ClientName, postHttpParams);
-
-		var wc = new System./**/Net.WebClient();
-
-		//wc.Headers.Set("Content-Type", "application/x-gzip");
-		wc.Headers.Set("Content-Type", "application/octet-stream");
-		wc.UploadData(uploadUrl, "POST", bytes);
-
-		Log.Info("Data uploaded to '{0}'.", uploadUrl);
-
+		asset.SaveContentField("_last_result", string.Format("Operation completed at {0}", beganRunning.ToString("O")));
 	}
 	catch(Exception ex)
 	{
 		Log.Error(ex, "Exception occurred");
+
+		asset.SaveContentField("_last_result", string.Format("Operation failed: {0}", ex.ToString()));
 	}
 	finally
 	{
@@ -93,7 +77,8 @@
 <script runat="server" data-cpcode="true">
 
 	EmailLogger Log;
-	
+
+	string _CodeSyncBaseUri;
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
@@ -104,9 +89,17 @@
 	//};
 	//List<Regex> PathsIgnore = new List<Regex>();
 
+	public void Initialize()//would be the ctor
+	{
+		_CodeSyncBaseUri = "http://codesync.cp-contrib.com";
+
+		Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"ericnewton76@gmail.com");
+		Log.IsDebugEnabled = true;// asset.Raw["IsDebugEnabled"] == "true";
+	}
+
 	bool skipFoldersUnderscore = true;
 	bool skipFilesUnderscore = false;
-	
+
 	void WriteFolderAndChildren(XmlTextWriter xmlwriter)
 	{
 		foreach(string basepath in Paths)
@@ -116,7 +109,7 @@
 			WriteFolderAndChildren(folder, true, xmlwriter);
 		}
 	}
-	
+
 	private class AssetPathComparer : IComparer<AssetPath>
 	{
 
@@ -125,7 +118,7 @@
 			return string.Compare(x.ToString(), y.ToString(), true);
 		}
 	}
-	
+
 	void WriteFolderAndChildren(Asset folder, bool deep, XmlTextWriter xmlwriter)
 	{
 		if(ProcessFolderNode(folder) == false) return;
@@ -133,9 +126,9 @@
 		FilterParams p = new FilterParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
 
 		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_=>_.AssetPath,new AssetPathComparer()).ToList();
-		
+
 		Log.Info("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
-		
+
 		foreach (var asset1 in assetsInFolder)
 		{
 			string msg = string.Format("File:{0}", asset1.AssetPath.ToString());
@@ -179,17 +172,17 @@
 			}
 		}
 	}
-	
+
 	bool ProcessFolderNode(Asset folder)
 	{
 		return ProcessFolderNode(folder.AssetPath.ToString());
 	}
-	
+
 	bool ProcessFolderNode(string folderAssetPath)
 	{
 		bool process = true; //default is to process it
 		string msg = string.Format("Folder '{0}'.", folderAssetPath);
-		
+
 		//evaluate skip rules
 		//if(skipFoldersUnderscore && folder.AssetPath.Last().StartsWith("_"))
 		//{
@@ -211,7 +204,7 @@
 
 			Log.Info(msg);
 		}
-		
+
 		return process;
 	}
 
@@ -227,7 +220,7 @@
 			//msg += string.Format(": skipping because of underscore '{0}'", asset.AssetPath.Last());
 			process = false;
 		}
-		else 
+		else
 		{
 			foreach(var ExcludePathSpec in this.PathsIgnore)
 			{
@@ -238,13 +231,13 @@
 		//Log.Info(msg);
 		return process;
 	}
-	
-	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter) 
+
+	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter)
 	{
 		if(asset == null) throw new ArgumentNullException("asset");
 
 		if(ProcessFileNode(asset) == false) return;
-		
+
 		try
 		{
 			XmlTextWriter writer = new XmlTextWriter();
@@ -255,9 +248,9 @@
 
 			string modifiedByUserStr = GetModifiedByUserInfo(asset);
 			//Log.Debug("2");
-			
+
 			//sb.AppendFormat(" lastMod=\"{1}\" lastModBy=\"{2}\">", asset.AssetPath, asset.ModifiedDate, modifiedByUserStr);
-			writer.WriteAttributeString("LastMod", string.Format("{0:s}", asset.ModifiedDate));
+			writer.WriteAttributeString("LastMod", (asset.ModifiedDate != null ? asset.ModifiedDate.Value.ToString("O") : ""));
 			writer.WriteAttributeString("LastModBy", modifiedByUserStr);
 
 			var bytes = Encoding.UTF8.GetBytes(asset.Raw["body"]); //Out.DebugWriteLine("bytes.Length={0}", bytes.Length);
@@ -269,22 +262,22 @@
 			//sbOut.Append(writer.ToString()); 
 
 			//Log.Debug("3");
-			
+
 			string codefile = writer.ToString();
 			xmlwriter.WriteRaw(codefile);
-		} 
-		catch(Exception ex) 
+		}
+		catch(Exception ex)
 		{
 			string message = string.Format("Failed while reading asset {0} ({1})", asset.AssetPath, asset.Id, ex.ToString());
 			Log.Error(ex, message);
 		}
 
 	}
-	
+
 	private string GetModifiedByUserInfo(Asset asset)
 	{
 		User modifiedBy;
-		if(usersDictionary.ContainsKey(asset.ModifiedUserId) == false)
+		if(usersDictionary.TryGetValue(asset.ModifiedUserId, out modifiedBy) == false)
 		{
 			modifiedBy = CrownPeak.CMSAPI.User.Load(asset.ModifiedUserId);
 			usersDictionary[asset.ModifiedUserId] = modifiedBy;
@@ -297,7 +290,7 @@
 		string modifiedByUserStr;
 		if(modifiedBy != null)
 		{
-			modifiedByUserStr = string.Format("{0} {1} <{2}>", modifiedBy.Firstname, modifiedBy.Lastname, modifiedBy.Email);
+			modifiedByUserStr = modifiedBy.Id.ToString();
 		}
 		else
 		{
@@ -307,7 +300,43 @@
 
 		return modifiedByUserStr;
 	}
-	
-	
 
+	private void WriteUserReferences(IEnumerable<User> users, XmlTextWriter xmlwriter)
+	{
+		xmlwriter.WriteStartElement("UserRefs");
+
+		foreach(var user in users)
+		{
+			xmlwriter.WriteStartElement("u");
+			xmlwriter.WriteAttributeString("id", user.Id.ToString());
+			xmlwriter.WriteAttributeString("n", user.Firstname + " " + user.Lastname);
+			xmlwriter.WriteAttributeString("e", user.Email);
+
+			xmlwriter.WriteEndElement();
+		}
+
+		xmlwriter.WriteEndElement();
+	}
+
+	private void UploadToServer(XmlTextWriter xmlwriter)
+	{
+		var bytes = Encoding.UTF8.GetBytes(xmlwriter.ToString());
+
+		//Asset.CreateFromBase64("CodeLibrary.xml", asset.Parent, Convert.ToBase64String(orig.ToArray()));
+
+		//PostHttpParams postHttpParams = this.CreateMultipartFormUpload(attachment1);
+
+		string uploadUrl = _CodeSyncBaseUri + "/api/v1/library/" + context.ClientName + "/upload";
+
+		Log.Debug("posting data to '{0}'.", uploadUrl);
+		//Util.PostHttp(CodeSyncBaseUri+"/api/upload/library/" + context.ClientName, postHttpParams);
+
+		var wc = new System./**/Net.WebClient();
+
+		//wc.Headers.Set("Content-Type", "application/x-gzip");
+		wc.Headers.Set("Content-Type", "application/octet-stream");
+		wc.UploadData(uploadUrl, "POST", bytes);
+
+		Log.Info("Data uploaded to '{0}'.", uploadUrl);
+	}
 </script>
