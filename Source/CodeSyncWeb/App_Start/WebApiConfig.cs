@@ -12,10 +12,13 @@ namespace CodeSyncWeb
     {
         public static void Register(HttpConfiguration config)
         {
-            // Web API configuration and services
-            // Configure Web API to use only bearer token authentication.
-			config.Services.Replace(typeof(System.Web.Http.ExceptionHandling.IExceptionHandler), new CodeSyncWeb.Components.OopsExceptionHandler());
-            config.SuppressDefaultHostAuthentication();
+			// Web API configuration and services
+
+			//config.Services.Replace(typeof(System.Web.Http.ExceptionHandling.IExceptionHandler), new CodeSyncWeb.Components.OopsExceptionHandler());
+
+			// Configure Web API to use only bearer token authentication.
+
+			config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
 			config.Formatters.XmlFormatter.UseXmlSerializer = true;
