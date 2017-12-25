@@ -42,6 +42,25 @@ namespace CrownPeak.CMSAPI.CustomLibrary
 				sb.Append("INFO ").AppendLine(message).AppendLine();
 			}
 		}
+
+		public void Warn(string message)
+		{
+
+		}
+		public void Warn(string format, params object[] args)
+		{
+
+		}
+		public void Warn(Exception ex, string message)
+		{
+
+		}
+		public void Warn(Exception ex, string format, params object[] args)
+		{
+
+		}
+
+
 		public void Info(string format, params object[] args)
 		{
 			if(IsInfoEnabled)
