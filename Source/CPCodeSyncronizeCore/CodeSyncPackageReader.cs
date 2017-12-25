@@ -32,7 +32,7 @@ namespace CPCodeSyncronize
 			{
 				if(this.inputStream != null)
 				{
-					s = inputStream;
+					s = inputStream; 
 				}
 				else if(this.filename != null)
 				{
@@ -40,11 +40,16 @@ namespace CPCodeSyncronize
 					ownsStream = true;
 				}
 
-				byte[] markers=new byte[2];
+				if(s.CanSeek == false)
+				{
+					s = new BufferedStream(s);
+				}
+
+				byte[] markers = new byte[2];
 				s.Read(markers, 0, 2);
 				s.Seek(0, SeekOrigin.Begin);
 
-				if(markers[0] == 0x00 && markers[1] == 0x00)
+				if(markers[0] == 0x1f && markers[1] == 0x8b)
 				{
 					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
 				}
