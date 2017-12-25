@@ -61,8 +61,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Templates\LmCore\CodeSync\input.aspx" />
-    <Content Include="Templates\LmCore\CodeSync\post_save.aspx" />
+    <Content Include="Templates\CPContrib.CodeSync\CodeSync\input.aspx" />
+    <Content Include="Templates\CPContrib.CodeSync\CodeSync\post_save.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\Core_Classes.cs" />
