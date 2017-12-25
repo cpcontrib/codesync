@@ -36,17 +36,22 @@ namespace CPCodeSyncronize.Core
 		{
 			if(string.IsNullOrEmpty(Options.Instance)==false)
 			{
-				//set input file to configuration location default.
-				string inputFile = string.Format(@"\\dev01.lightmaker.us\web\cputil.lightmakerusa.com\codesync\App_Data\Uploads\{0}.xml", Options.Instance);
+				string[] inputFileFormats = new string[] { "{0}.xml.gz", "{0}.xml" };
 
-				if(File.Exists(inputFile))
+				foreach(var format in inputFileFormats.AsEnumerable())
 				{
-					state.InputFile = inputFile;
-				}
+					//set input file to configuration location default.
+					string inputFile = string.Format(format, Options.Instance);
 
-				//set output directory to current directory + instance name
-				if(String.IsNullOrEmpty(state.OutputDir))
-					state.OutputDir = string.Format(@".\{0}", Options.Instance);
+					if(File.Exists(inputFile))
+					{
+						state.InputFile = inputFile;
+					}
+
+					//set output directory to current directory + instance name
+					if(String.IsNullOrEmpty(state.OutputDir))
+						state.OutputDir = string.Format(@".\{0}", Options.Instance);
+				}
 			}
 
 		}
