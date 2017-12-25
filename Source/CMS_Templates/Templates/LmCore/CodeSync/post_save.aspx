@@ -1,11 +1,11 @@
-<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
+﻿<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
 <%@ Import Namespace="CrownPeak.CMSAPI" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
 <% //@Package=Lm.Core,1.0.0 %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
-	Initialize();
+	Initialize(LogDebug:false);
 
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
 	asset.DeleteContentField("log");
@@ -83,18 +83,18 @@
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
 	List<string> PathsIgnore = new List<string>();// { 
-	//	"/System/Templates/AdventGeneral",
-	//	"/System/Templates/Simple Site CSharp",
-	//	"/System/Templates/Simple Site"
-	//};
-	//List<Regex> PathsIgnore = new List<Regex>();
+												  //	"/System/Templates/AdventGeneral",
+												  //	"/System/Templates/Simple Site CSharp",
+												  //	"/System/Templates/Simple Site"
+												  //};
+												  //List<Regex> PathsIgnore = new List<Regex>();
 
-	public void Initialize()//would be the ctor
+	public void Initialize(bool LogDebug = false)//would be the ctor
 	{
 		_CodeSyncBaseUri = "http://codesync.cp-contrib.com";
 
 		Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"ericnewton76@gmail.com");
-		Log.IsDebugEnabled = true;// asset.Raw["IsDebugEnabled"] == "true";
+		if(LogDebug) Log.IsDebugEnabled = LogDebug;// asset.Raw["IsDebugEnabled"] == "true";
 	}
 
 	bool skipFoldersUnderscore = true;
@@ -232,6 +232,15 @@
 		return process;
 	}
 
+	byte[] Sha1Hash(byte[] bytes)
+	{
+		using(var sha1 = new System.Security.Cryptography.SHA1Managed())
+		{
+
+			return sha1.ComputeHash(bytes);
+		}
+	}
+
 	void WriteFileNode(Asset asset, XmlTextWriter xmlwriter)
 	{
 		if(asset == null) throw new ArgumentNullException("asset");
@@ -254,6 +263,10 @@
 			writer.WriteAttributeString("LastModBy", modifiedByUserStr);
 
 			var bytes = Encoding.UTF8.GetBytes(asset.Raw["body"]); //Out.DebugWriteLine("bytes.Length={0}", bytes.Length);
+			byte[] sha1hash = Sha1Hash(bytes);
+
+			writer.WriteAttributeString("sha1Hash", BitConverter.ToString(sha1hash).Replace("-", ""));
+
 			writer.WriteString(Convert.ToBase64String(bytes));//sb.Append(Convert.ToBase64String(bytes));
 
 			writer.WriteEndElement(); //sb.AppendLine("</codeFile>");
