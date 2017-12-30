@@ -5,8 +5,6 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronize", "CPCodeSyncronize\CPCodeSyncronize.csproj", "{88DD3C25-4EB2-4872-9584-F8B84324B506}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS_Templates", "CMS_Templates\CMS_Templates.csproj", "{062C16B7-2634-4842-AF07-1CF85EC74BDC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronizeCore", "CPCodeSyncronizeCore\CPCodeSyncronizeCore.csproj", "{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronizeTests", "CPCodeSyncronizeTests\CPCodeSyncronizeTests.csproj", "{067456C0-086C-46A8-B37F-1405717B7BFC}"
@@ -19,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C33E17
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSyncWeb", "CodeSyncWeb\CodeSyncWeb.csproj", "{73BE447D-908E-412F-A153-58AF1CB7F34D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPContrib.CodeSync", "CPContrib.CodeSync\CPContrib.CodeSync.csproj", "{062C16B7-2634-4842-AF07-1CF85EC74BDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,14 +40,6 @@ Global
 		{88DD3C25-4EB2-4872-9584-F8B84324B506}.Release|Mixed Platforms.Build.0 = Release|x86
 		{88DD3C25-4EB2-4872-9584-F8B84324B506}.Release|x86.ActiveCfg = Release|x86
 		{88DD3C25-4EB2-4872-9584-F8B84324B506}.Release|x86.Build.0 = Release|x86
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|x86.ActiveCfg = Release|Any CPU
 		{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -80,6 +72,18 @@ Global
 		{73BE447D-908E-412F-A153-58AF1CB7F34D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{73BE447D-908E-412F-A153-58AF1CB7F34D}.Release|x86.ActiveCfg = Release|Any CPU
 		{73BE447D-908E-412F-A153-58AF1CB7F34D}.Release|x86.Build.0 = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Debug|x86.Build.0 = Debug|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|x86.ActiveCfg = Release|Any CPU
+		{062C16B7-2634-4842-AF07-1CF85EC74BDC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
