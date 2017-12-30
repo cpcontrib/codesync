@@ -257,9 +257,9 @@
     </None>
     <None Include="Project_Readme.html" />
     <Content Include="Views\Home\Index.cshtml" />
+    <None Include="Properties\PublishProfiles\WebDeploy to CodeSync Prod.pubxml" />
     <None Include="Properties\PublishProfiles\Dev01.pubxml" />
     <Content Include="Views\CodeSync\Index.cshtml" />
-    <None Include="Properties\PublishProfiles\WebDeploy to PROD.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
