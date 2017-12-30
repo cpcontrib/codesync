@@ -73,12 +73,7 @@ namespace CPCodeSyncronize
 
 				using(Stream inputStream = GetReadableStream(base64contentgzip))
 				{
-					int bytesRead = -1;
-					do
-					{
-						bytesRead = inputStream.Read(base64contentgzip, 0, base64contentgzip.Length);
-						outputStream.Write(base64contentgzip, 0, bytesRead);
-					} while(bytesRead > 0);
+					inputStream.CopyTo(outputStream);
 				}
 			}
 			else
