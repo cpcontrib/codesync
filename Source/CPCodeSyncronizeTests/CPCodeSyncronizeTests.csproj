@@ -55,10 +55,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CMS_Templates\CMS_Templates.csproj">
-      <Project>{062c16b7-2634-4842-af07-1cf85ec74bdc}</Project>
-      <Name>CMS_Templates</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CPCodeSyncronizeCore\CPCodeSyncronizeCore.csproj">
       <Project>{c7375c91-24c8-4744-9fe0-0f77afd30fb0}</Project>
       <Name>CPCodeSyncronizeCore</Name>
