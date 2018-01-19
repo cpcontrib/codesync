@@ -1,11 +1,12 @@
 ﻿<%@ Page Language="C#" Inherits="CrownPeak.Internal.Debug.PostSaveInit" %>
+
 <%@ Import Namespace="CrownPeak.CMSAPI" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.Services" %>
 <%@ Import Namespace="CrownPeak.CMSAPI.CustomLibrary" %>
 <% //@Package=Lm.Core,1.0.0 %>
 <!--DO NOT MODIFY CODE ABOVE THIS LINE-->
 <% 
-	Initialize(LogDebug:false);
+	Initialize(LogDebug: false);
 
 	//Log.IsInfoEnabled = true; Log.IsDebugEnabled = true; 
 	asset.DeleteContentField("log");
@@ -23,10 +24,10 @@
 		PathsIgnore.Clear();
 		PathsIgnore.AddRange(asset.Raw["paths_exclude"].Split('\n').Select(_ => _.Trim())); //Globber.RegexGlob(_.Trim())));
 	}
-		 
+
 	Log.Info("Paths: {0}", String.Join("|", Paths));
 	Log.Info("PathsIgnore: {0}", String.Join("|", PathsIgnore));
-		
+
 	this.usersDictionary = CrownPeak.CMSAPI.User.GetUsers().ToDictionary(_ => _.Id);
 
 	try { this.ModifiedSince = DateTime.Parse(asset.Raw["modified_since"]); }
@@ -82,18 +83,19 @@
 	DateTime? ModifiedSince;
 	IDictionary<int, CrownPeak.CMSAPI.User> usersDictionary;
 	List<string> Paths = new List<string>() { "/System/Library", "/System/Templates" };
-	List<string> PathsIgnore = new List<string>();// { 
-												  //	"/System/Templates/AdventGeneral",
-												  //	"/System/Templates/Simple Site CSharp",
-												  //	"/System/Templates/Simple Site"
-												  //};
-												  //List<Regex> PathsIgnore = new List<Regex>();
+	List<string> PathsIgnore = new List<string>();
+	// { 
+	//	"/System/Templates/AdventGeneral",
+	//	"/System/Templates/Simple Site CSharp",
+	//	"/System/Templates/Simple Site"
+	//};
+	
 
 	public void Initialize(bool LogDebug = false)//would be the ctor
 	{
 		_CodeSyncBaseUri = "http://codesync.cp-contrib.com";
 
-		Log = new EmailLogger("CodeSync " + context.ClientName, recipients:"ericnewton76@gmail.com");
+		Log = new EmailLogger("CodeSync " + context.ClientName, recipients: "ericnewton76@gmail.com");
 		if(LogDebug) Log.IsDebugEnabled = LogDebug;// asset.Raw["IsDebugEnabled"] == "true";
 	}
 
@@ -123,13 +125,13 @@
 	{
 		if(ProcessFolderNode(folder) == false) return;
 
-		FilterParams p = new FilterParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes=false };
+		FilterParams p = new FilterParams() { FieldNames = Util.MakeList("body"), ExcludeProjectTypes = false };
 
-		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_=>_.AssetPath,new AssetPathComparer()).ToList();
+		List<Asset> assetsInFolder = folder.GetFilterList(p).OrderBy(_ => _.Label).OrderBy(_ => _.AssetPath, new AssetPathComparer()).ToList();
 
 		Log.Info("Found {0} assets in folder '{1}'.", assetsInFolder.Count, folder.AssetPath);
 
-		foreach (var asset1 in assetsInFolder)
+		foreach(var asset1 in assetsInFolder)
 		{
 			string msg = string.Format("File:{0}", asset1.AssetPath.ToString());
 			try
@@ -164,9 +166,9 @@
 			}
 		}
 
-		if (false) //deep)
+		if(false) //deep)
 		{
-			foreach (Asset folder2 in folder.GetFolderList())
+			foreach(Asset folder2 in folder.GetFolderList())
 			{
 				WriteFolderAndChildren(folder2, deep, xmlwriter);
 			}
@@ -231,7 +233,6 @@
 		//Log.Info(msg);
 		return process;
 	}
-
 	byte[] Sha1Hash(byte[] bytes)
 	{
 		using(var sha1 = new System.Security.Cryptography.SHA1Managed())
@@ -251,7 +252,7 @@
 		{
 			XmlTextWriter writer = new XmlTextWriter();
 			writer.WriteStartElement("CodeFile");
-			writer.WriteAttributeString("Name",asset.AssetPath.ToString());
+			writer.WriteAttributeString("Name", asset.AssetPath.ToString());
 			writer.WriteAttributeString("Encoding", "base64");
 			//Log.Debug("1");
 
@@ -352,4 +353,5 @@
 
 		Log.Info("Data uploaded to '{0}'.", uploadUrl);
 	}
+
 </script>
