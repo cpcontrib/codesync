@@ -8,8 +8,8 @@
     <ProjectGuid>{88DD3C25-4EB2-4872-9584-F8B84324B506}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>cpcodesync</AssemblyName>
+    <RootNamespace>codesync</RootNamespace>
+    <AssemblyName>codesync</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
