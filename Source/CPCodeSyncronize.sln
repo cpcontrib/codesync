@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "codesync-cli", "codesync-cli\codesync-cli.csproj", "{88DD3C25-4EB2-4872-9584-F8B84324B506}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronizeCore", "CPCodeSyncronizeCore\CPCodeSyncronizeCore.csproj", "{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "codesync-core", "codesync-core\codesync-core.csproj", "{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronizeTests", "CPCodeSyncronizeTests\CPCodeSyncronizeTests.csproj", "{067456C0-086C-46A8-B37F-1405717B7BFC}"
 EndProject

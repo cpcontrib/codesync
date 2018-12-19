@@ -7,8 +7,8 @@
     <ProjectGuid>{C7375C91-24C8-4744-9FE0-0F77AFD30FB0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CPCodeSyncronize</RootNamespace>
-    <AssemblyName>CPCodeSyncronizeCore</AssemblyName>
+    <RootNamespace>Codesync.Core</RootNamespace>
+    <AssemblyName>codesync-core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
