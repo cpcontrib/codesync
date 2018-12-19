@@ -19,6 +19,7 @@ namespace CPCodeSyncronize
 		{
 			if(inputStream == null) throw new ArgumentNullException("inputStream");
 			this.inputStream = inputStream;
+			ownsStream = false;
 		}
 
 		string filename;
@@ -34,38 +35,45 @@ namespace CPCodeSyncronize
 			Stream s = null;
 			try
 			{
-				if(this.inputStream != null)
-				{
-					s = inputStream; 
-				}
-				else if(this.filename != null)
-				{
-					s = File.OpenRead(filename);
-					ownsStream = true;
-				}
-
-				if(s.CanSeek == false)
-				{
-					s = new BufferedStream(s);
-				}
-
-				byte[] markers = new byte[2];
-				s.Read(markers, 0, 2);
-				s.Seek(0, SeekOrigin.Begin);
-
-				if(markers[0] == 0x1f && markers[1] == 0x8b)
-				{
-					s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
-				}
+				s = _OpenStream();
 				
 				return StreamUtils.StreamElements(s, "CodeFile");
-				//XDocument xDoc = XDocument.Load(s); s.Close();
-				//return xDoc.Element("codeLibrary").Elements("codeFile");
 			}
 			finally
 			{
 
 			}
+		}
+
+		private Stream _OpenStream()
+		{
+			Stream s;
+
+			if(this.filename != null)
+			{
+				s = File.OpenRead(filename);
+				ownsStream = true;
+			}
+			else
+			{
+				s = inputStream;
+			}
+
+			if(s.CanSeek == false)
+			{
+				s = new BufferedStream(s);
+			}
+
+			byte[] markers = new byte[2];
+			s.Read(markers, 0, 2);
+			s.Seek(0, SeekOrigin.Begin);
+
+			if(markers[0] == 0x1f && markers[1] == 0x8b)
+			{
+				s = new System.IO.Compression.GZipStream(s, System.IO.Compression.CompressionMode.Decompress);
+			}
+
+			return s;
 		}
 
 		/// <summary>
@@ -84,15 +92,14 @@ namespace CPCodeSyncronize
 
 
 
-		public IEnumerable<string> ScanElementsPath()
+		public IEnumerable<T> ScanElements<T>(Func<XElement, T> item)
 		{
 			IEnumerable<XElement> codeFileElements = GetNodes();
 
-			List<string> relPaths = new List<string>(100);
-
 			foreach(var filenode in codeFileElements)
 			{
-				yield return filenode.Attribute("Name").Value;
+				T returnval = item(filenode);
+				yield return returnval;
 			}
 
 		}
@@ -100,7 +107,12 @@ namespace CPCodeSyncronize
 
 		public void Dispose()
 		{
-			
+			if(inputStream!=null && ownsStream==true)
+			{
+				IDisposable disposable = inputStream as IDisposable;
+				if(disposable != null) disposable.Dispose();
+			}
+			GC.SuppressFinalize(this);
 		}
 	}
 

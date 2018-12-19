@@ -43,8 +43,8 @@
   <ItemGroup>
     <Compile Include="CodeSyncLib\Class1.cs" />
     <Compile Include="CodeFileNode_Tests.cs" />
-    <Compile Include="NUnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CodeSyncPackageReader_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

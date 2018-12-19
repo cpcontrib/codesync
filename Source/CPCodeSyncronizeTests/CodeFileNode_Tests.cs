@@ -14,7 +14,6 @@ namespace CPCodeSyncronizeTests.CodeSyncLib
 	public class CodeFileNode_Tests
 	{
 
-		const string XML1 = @"<CodeLibrary><CodeFile Name=""/System"">{CodeFileContent}</CodeFile></CodeLibrary>";
 		
 		const string STRING1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		const string STRING1_BASE64 = "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=";
@@ -85,18 +84,7 @@ namespace CPCodeSyncronizeTests.CodeSyncLib
 			Assert.That(actual, Is.EqualTo(STRING1));
 		}
 
-		private MemoryStream CreateFromText(string encodingtype, string text)
-		{
-			var str = XML1
-					.Replace(">{CodeFileContent}", string.Format(" Encoding=\"{0}\">", encodingtype)+"{CodeFileContent}")
-					.Replace("{CodeFileContent}", text);
 
-			return new MemoryStream(
-				System.Text.Encoding.UTF8.GetBytes(
-					str
-				)
-			);
-		}
 
 	}
 }
