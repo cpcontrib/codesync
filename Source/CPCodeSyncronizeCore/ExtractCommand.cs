@@ -47,6 +47,17 @@ namespace CPCodeSyncronize
 		{
 			if(executestate < 2) PreExecute();
 
+			if(String.IsNullOrEmpty(state.InputFile))
+			{
+				Console.WriteLine("fail InputFile not specified or --Instance option unable to find a file to use.");
+				return 1;
+			}
+			if(File.Exists(state.InputFile) == false)
+			{
+				Console.WriteLine("fail InputFile '{0}' doesnt exist.", state.InputFile);
+				return 1;
+			}
+
 			IDictionary<string,bool> existingFiles = ReadExistingFiles(state.FullOutputPath);
 
 			using(CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile))
