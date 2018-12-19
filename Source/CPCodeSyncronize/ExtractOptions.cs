@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
 using CommandLine;
 
 namespace CPCodeSyncronize.CLI
 {
 
+	[Verb("extract")]
 	public class ExtractOptions : CommonOptions
 	{
 		[Option("instance", HelpText = "Instance name to pull file from. Uses configuration and current directory to read from and write to.")]
 		public string Instance { get; set; }
 
-		[Option("input", HelpText="Input codesync xml file for reading. Supports .gz internally.")]
+		[Option("input", HelpText="Input codesync xml file for reading. Detects gzip encoding automatically.")]
 		public string InputFile { get;set;}
 
 		[Option('o', "outputdir", HelpText="Directory to output.  Default is same directory as input file (.\\)")]
@@ -30,7 +28,7 @@ namespace CPCodeSyncronize.CLI
 		//[ParserState]
 		//public IParserState LastParserState { get;set; }
 
-		[Option("sync", HelpText="Syncronize (mirror) the package",DefaultValue=true)]
+		[Option("sync", HelpText="Syncronize (mirror) the package", Default=true)]
 		public bool Sync { get; set; }
 	}
 }

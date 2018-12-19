@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
+using CommandLine;
 
 namespace CPCodeSyncronize.CLI
 {
+
+	[Verb("list")]
 	public class ListOptions : CommonOptions
 	{
 
-		
+		[Value(0, Required=true)]
 		public string InputFile { get; set; }
 
 	}
