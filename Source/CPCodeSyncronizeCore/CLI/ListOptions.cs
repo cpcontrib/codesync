@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CPCodeSyncronize
+namespace CPCodeSyncronize.CLI
 {
 	public class ListOptions : CommonOptions
 	{

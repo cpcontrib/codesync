@@ -43,14 +43,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeSyncPackageReader.cs" />
-    <Compile Include="CommonOptions.cs" />
+    <Compile Include="CLI\CommonOptions.cs" />
     <Compile Include="DirectoryUtil.cs" />
-    <Compile Include="ExtractCommand.cs" />
-    <Compile Include="ExtractCommandBuilder.cs" />
-    <Compile Include="ExtractOptions.cs" />
-    <Compile Include="ICommand.cs" />
-    <Compile Include="ListCommand.cs" />
-    <Compile Include="ListOptions.cs" />
+    <Compile Include="CLI\ExtractCommand.cs" />
+    <Compile Include="CLI\ExtractCommandBuilder.cs" />
+    <Compile Include="CLI\ExtractOptions.cs" />
+    <Compile Include="CLI\ICommand.cs" />
+    <Compile Include="CLI\ListCommand.cs" />
+    <Compile Include="CLI\ListOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamUtils.cs" />
     <Compile Include="XLinqExtensions.cs" />

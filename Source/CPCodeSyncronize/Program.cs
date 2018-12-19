@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace ConsoleApplication1
 {
-	using CPCodeSyncronize;
+	using CPCodeSyncronize.CLI;
 
 	class Program
 	{

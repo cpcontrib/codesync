@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace CPCodeSyncronize
+namespace CPCodeSyncronize.CLI
 {
 	public class ExtractCommand : ICommand
 	{
@@ -23,7 +23,7 @@ namespace CPCodeSyncronize
 			executestate = 1;
 			try
 			{
-				CPCodeSyncronize.Core.ExtractCommandBuilder builder = new Core.ExtractCommandBuilder();
+				ExtractCommandBuilder builder = new ExtractCommandBuilder();
 				this.state = builder.ReadOptions(this.Options);
 				executestate = 2;
 			}

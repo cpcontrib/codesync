@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using CommandLine;
 
-namespace CPCodeSyncronize
+namespace CPCodeSyncronize.CLI
 {
 	public class CommonOptions
 	{

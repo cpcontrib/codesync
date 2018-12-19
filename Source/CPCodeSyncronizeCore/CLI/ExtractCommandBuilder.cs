@@ -4,14 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace CPCodeSyncronize.Core
+namespace CPCodeSyncronize.CLI
 {
 	public class ExtractCommandBuilder
 	{
 
-		public CPCodeSyncronize.ExtractCommand.ExtractState ReadOptions(ExtractOptions Options)
+		public ExtractCommand.ExtractState ReadOptions(ExtractOptions Options)
 		{
-			var state = new CPCodeSyncronize.ExtractCommand.ExtractState();
+			var state = new ExtractCommand.ExtractState();
 
 			if(Options.Porcelain)
 			{
@@ -56,7 +56,7 @@ namespace CPCodeSyncronize.Core
 
 		}
 
-		private void ReadInputFile(ExtractOptions Options, ref CPCodeSyncronize.ExtractCommand.ExtractState state)
+		private void ReadInputFile(ExtractOptions Options, ref ExtractCommand.ExtractState state)
 		{
 			if(string.IsNullOrEmpty(Options.InputFile) == false)
 			{
@@ -84,7 +84,7 @@ namespace CPCodeSyncronize.Core
 			}
 		}
 
-		private void ReadOutputDir(ExtractOptions Options, ref CPCodeSyncronize.ExtractCommand.ExtractState state)
+		private void ReadOutputDir(ExtractOptions Options, ref ExtractCommand.ExtractState state)
 		{
 			if(Options.Scratch == true)
 			{
