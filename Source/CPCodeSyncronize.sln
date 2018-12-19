@@ -11,11 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPCodeSyncronizeTests", "CP
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{65EECC3D-C12C-46C7-AC84-1138250ABD7D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C33E172C-FF16-4DE2-B735-A9DFAF074A15}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSyncWeb", "CodeSyncWeb\CodeSyncWeb.csproj", "{73BE447D-908E-412F-A153-58AF1CB7F34D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPContrib.CodeSync", "CPContrib.CodeSync\CPContrib.CodeSync.csproj", "{062C16B7-2634-4842-AF07-1CF85EC74BDC}"
