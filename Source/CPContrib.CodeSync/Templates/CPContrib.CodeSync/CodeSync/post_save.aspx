@@ -321,12 +321,23 @@
 
 		foreach(var user in users)
 		{
-			xmlwriter.WriteStartElement("u");
-			xmlwriter.WriteAttributeString("id", user.Id.ToString());
-			xmlwriter.WriteAttributeString("n", user.Firstname + " " + user.Lastname);
-			xmlwriter.WriteAttributeString("e", user.Email);
+			if(user==null) { Log.Debug("Encountered null user in users collection."); continue; }
+			try
+			{
+				xmlwriter.WriteStartElement("u");
+				xmlwriter.WriteAttributeString("id", user.Id.ToString());
+				xmlwriter.WriteAttributeString("n", user.Firstname + " " + user.Lastname);
+				xmlwriter.WriteAttributeString("e", user.Email);
 
-			xmlwriter.WriteEndElement();
+				xmlwriter.WriteEndElement();
+			}
+			catch(Exception ex)
+			{
+				string msg = "";
+				try { msg = "Failed to write a user: "; msg += user.Id.ToString(); }
+				catch { }
+				Log.Error(ex, msg);
+			}
 		}
 
 		xmlwriter.WriteEndElement();
