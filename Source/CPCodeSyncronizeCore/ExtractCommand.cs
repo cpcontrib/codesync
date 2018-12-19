@@ -170,7 +170,27 @@ namespace CPCodeSyncronize
 
 			string fullpath = Path.Combine(basepath, filepath);
 
-			WriteFileContent(packageReader, node, basepath, fullpath);
+			//check to see if file in filesystem needs updating (do simple size/datetime check)
+			if(ShouldWriteFileContent(packageReader, node, basepath, fullpath))
+			{
+				WriteFileContent(packageReader, node, basepath, fullpath);
+				DateTime lastMod;
+				if(DateTime.TryParse(node.GetAttributeValue("LastMod"), out lastMod) == true)
+				{
+					//LastMod is in UTC from the CMS.
+					lastMod = lastMod.ToLocalTime();
+					File.SetLastWriteTime(fullpath, lastMod);
+				}
+
+				if(Options.Verbose)
+					Console.WriteLine(" ok  {0}", fullpath);
+			}
+			else
+			{
+				if(Options.Verbose)
+					Console.WriteLine("skip {0}", fullpath);
+
+			}
 
 			if(existingFiles.ContainsKey(filepath) == false)
 			{
@@ -181,14 +201,7 @@ namespace CPCodeSyncronize
 				existingFiles[filepath] = true;
 			}
 
-			DateTime lastMod;
-			if(DateTime.TryParse(node.GetAttributeValue("lastMod"), out lastMod)==true)
-			{
-				File.SetLastWriteTime(fullpath, lastMod);
-			}
 
-			if (Options.Verbose)
-				Console.WriteLine("Wrote file '{0}'.", fullpath);
 		}
 
 		private static byte[] S_EmptyByteArray=new byte[0];
@@ -232,7 +245,44 @@ namespace CPCodeSyncronize
 
 		}
 
-		
+		/// <summary>
+		/// amount of jitter allowed for lastmod comparisons
+		/// </summary>
+		TimeSpan lastModJitter = new TimeSpan(0, 0, 2);
+
+		bool ShouldWriteFileContent(CodeSyncPackageReader packageReader, XElement node, string basepath, string fullpath)
+		{
+			try
+			{
+				bool shouldWrite = true;
+
+				DateTime cmsLastMod;
+				DateTime fsLastMod;
+				if(DateTime.TryParse(node.Attribute("LastMod")?.Value, out cmsLastMod))
+				{
+					fsLastMod = File.GetLastWriteTimeUtc(fullpath);
+
+					if((cmsLastMod - fsLastMod) < lastModJitter)
+					{
+						shouldWrite = false;
+					}
+				}
+
+				return shouldWrite;
+			}
+			catch(Exception ex)
+			{
+				if(Options.Verbose == false) Console.WriteLine();
+				string nameAttrValue = ""; try { nameAttrValue = node.Attribute("Name").Value; }
+				catch { }
+				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
+				Console.Error.WriteLine(node.ToString());
+				return true;
+			}
+
+		}
+
+
 	}
 
 }
