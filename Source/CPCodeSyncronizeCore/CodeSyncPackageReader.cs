@@ -25,6 +25,10 @@ namespace CPCodeSyncronize
 		Stream inputStream;
 		bool ownsStream = false;
 
+		/// <summary>
+		/// Creates an enumeration of CodeFile elements in the given file.
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<XElement> GetNodes()
 		{
 			Stream s = null;
@@ -64,39 +68,21 @@ namespace CPCodeSyncronize
 			}
 		}
 
-		public void WriteNodeValueToStream(XElement node, Stream outputStream)
+		/// <summary>
+		/// Gets an enumerable list from <see cref="GetNodes"/>
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<CodeFileNode> GetCodeFileNodes()
 		{
-			var nodeEncoding = node.GetAttributeValue("Encoding");
-			if(nodeEncoding == null || nodeEncoding == "base64")
+			var nodesEnumerable = GetNodes();
+			foreach(XElement node in nodesEnumerable)
 			{
-				byte[] base64contentgzip = Convert.FromBase64String(node.Value.Trim());
-
-				using(Stream inputStream = GetReadableStream(base64contentgzip))
-				{
-					inputStream.CopyTo(outputStream);
-				}
-			}
-			else
-			{
-				StreamWriter sw = new StreamWriter(outputStream);
-				sw.Write(node.Value.Trim());
-				sw.Flush();
+				yield return new CodeFileNode(node);
 			}
 		}
 
-		public Stream GetReadableStream(byte[] contentBytes)
-		{
-			Stream inputStream = new MemoryStream(contentBytes);
 
-			if(contentBytes[0] == 0x1f && contentBytes[1] == 0x8b)
-			{
-				var gzip = new System.IO.Compression.GZipStream(inputStream, System.IO.Compression.CompressionMode.Decompress);
 
-				return gzip;
-			}
-
-			return inputStream;
-		}
 
 		public IEnumerable<string> ScanElementsPath()
 		{

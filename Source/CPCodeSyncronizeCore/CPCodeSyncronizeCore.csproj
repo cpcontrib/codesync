@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeFile.cs" />
     <Compile Include="CodeSyncPackageReader.cs" />
     <Compile Include="CLI\CommonOptions.cs" />
     <Compile Include="DirectoryUtil.cs" />

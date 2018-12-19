@@ -127,7 +127,7 @@ namespace CPCodeSyncronize.CLI
 
 		void WriteFiles(CodeSyncPackageReader packageReader, string outputDir, ref IDictionary<string,bool> existingFiles)
 		{
-			IEnumerable<XElement> codeFileElements = packageReader.GetNodes();
+			IEnumerable<CodeFileNode> codeFileElements = packageReader.GetCodeFileNodes();
 
 			if(Options.Verbose)
 			{
@@ -143,7 +143,7 @@ namespace CPCodeSyncronize.CLI
 			int count=0;
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(packageReader, filenode, outputDir, ref existingFiles);
+				WriteFile(filenode, outputDir, ref existingFiles);
 				count++;
 
 				if(writeTally) Console.Write("Wrote {0} files\r", count);
@@ -153,9 +153,9 @@ namespace CPCodeSyncronize.CLI
 		}
 
 
-		void WriteFile(CodeSyncPackageReader packageReader, XElement node, string basepath, ref IDictionary<string,bool> existingFiles)
+		void WriteFile(CodeFileNode node, string basepath, ref IDictionary<string,bool> existingFiles)
 		{
-			string name = node.GetAttributeValue("Name");
+			string name = node.Name;
 			string filepath;
 
 			if (name.StartsWith("/"))
@@ -171,24 +171,23 @@ namespace CPCodeSyncronize.CLI
 			string fullpath = Path.Combine(basepath, filepath);
 
 			//check to see if file in filesystem needs updating (do simple size/datetime check)
-			if(ShouldWriteFileContent(packageReader, node, basepath, fullpath))
+			if(ShouldWriteFileContent(node, basepath, fullpath))
 			{
-				WriteFileContent(packageReader, node, basepath, fullpath);
-				DateTime lastMod;
-				if(DateTime.TryParse(node.GetAttributeValue("LastMod"), out lastMod) == true)
+				WriteFileContent(node, basepath, fullpath);
+				if(node.LastMod != null)
 				{
 					//LastMod is in UTC from the CMS.
-					lastMod = lastMod.ToLocalTime();
+					DateTime lastMod = node.LastMod.Value.ToLocalTime();
 					File.SetLastWriteTime(fullpath, lastMod);
 				}
 
 				if(Options.Verbose)
-					Console.WriteLine(" ok  {0}", fullpath);
+					Console.WriteLine(" ok  {0}", node.Name);
 			}
 			else
 			{
 				if(Options.Verbose)
-					Console.WriteLine("skip {0}", fullpath);
+					Console.WriteLine("skip {0}", node.Name);
 
 			}
 
@@ -206,11 +205,11 @@ namespace CPCodeSyncronize.CLI
 
 		private static byte[] S_EmptyByteArray=new byte[0];
 
-		void WriteFileContent(CodeSyncPackageReader packageReader, XElement node, string basepath, string fullpath)
+		void WriteFileContent(CodeFileNode node, string basepath, string fullpath)
 		{
 			try
 			{
-				if (node.Value != "")
+				if (node.HasContent())
 				{
 					Stream outputStream = null;
 					try
@@ -220,7 +219,7 @@ namespace CPCodeSyncronize.CLI
 						else
 							outputStream = new MemoryStream();
 
-						packageReader.WriteNodeValueToStream(node, outputStream);
+						node.WriteContent(outputStream);
 
 						outputStream.Flush();
 					}
@@ -237,7 +236,7 @@ namespace CPCodeSyncronize.CLI
 			catch (Exception ex)
 			{
 				if (Options.Verbose == false) Console.WriteLine();
-				string nameAttrValue = ""; try { nameAttrValue = node.Attribute("Name").Value; }
+				string nameAttrValue = ""; try { nameAttrValue = node.Name; }
 				catch { }
 				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
 				Console.Error.WriteLine(node.ToString());
@@ -250,17 +249,16 @@ namespace CPCodeSyncronize.CLI
 		/// </summary>
 		TimeSpan lastModJitter = new TimeSpan(0, 0, 2);
 
-		bool ShouldWriteFileContent(CodeSyncPackageReader packageReader, XElement node, string basepath, string fullpath)
+		bool ShouldWriteFileContent(CodeFileNode node, string basepath, string fullpath)
 		{
 			try
 			{
 				bool shouldWrite = true;
 
-				DateTime cmsLastMod;
-				DateTime fsLastMod;
-				if(DateTime.TryParse(node.Attribute("LastMod")?.Value, out cmsLastMod))
+				if(node.LastMod.HasValue)
 				{
-					fsLastMod = File.GetLastWriteTimeUtc(fullpath);
+					DateTime cmsLastMod = node.LastMod.GetValueOrDefault();
+					DateTime fsLastMod = File.GetLastWriteTimeUtc(fullpath);
 
 					if((cmsLastMod - fsLastMod) < lastModJitter)
 					{
@@ -270,13 +268,9 @@ namespace CPCodeSyncronize.CLI
 
 				return shouldWrite;
 			}
-			catch(Exception ex)
+			catch 
 			{
-				if(Options.Verbose == false) Console.WriteLine();
-				string nameAttrValue = ""; try { nameAttrValue = node.Attribute("Name").Value; }
-				catch { }
-				Console.Error.WriteLine("Failed on node for file '{0}'.\n{1}", nameAttrValue, ex.ToString());
-				Console.Error.WriteLine(node.ToString());
+				//Status.Warn(ex);
 				return true;
 			}
 
