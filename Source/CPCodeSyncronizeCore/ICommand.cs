@@ -11,7 +11,7 @@ namespace CPCodeSyncronize
 
 		void PreExecute();
 
-		void Execute();
+		int Execute();
 
 	}
 }

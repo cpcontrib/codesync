@@ -43,7 +43,7 @@ namespace CPCodeSyncronize
 
 		private ExtractState state;
 
-		public void Execute()
+		public int Execute()
 		{
 			if(executestate < 2) PreExecute();
 
@@ -58,6 +58,8 @@ namespace CPCodeSyncronize
 					DeleteUnused(state.FullOutputPath, existingFiles);
 				}
 			}
+
+			return 0;
 		}
 
 		private void DeleteUnused(string basepath, IDictionary<string, bool> existingFiles)

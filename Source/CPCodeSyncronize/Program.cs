@@ -15,7 +15,7 @@ namespace ConsoleApplication1
 	class Program
 	{
 
-		static void Main(string[] args)
+		static int Main(string[] args)
 		{
 			string invokedVerb = null;
 			object invokedVerbInstance = null;
@@ -60,7 +60,8 @@ namespace ConsoleApplication1
 			//ScanElementsPath(filename, Options);
 
 			//start the command
-			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed( ()=>{ cmd.Execute(); } );
+			int exitcode = 0;
+			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed(()=> { exitcode = cmd.Execute(); });
 
 			if(Options.Quiet == false && Options.Porcelain == false)
 			{
@@ -70,6 +71,8 @@ namespace ConsoleApplication1
 			if(Debugger.IsAttached) {
 				System.Threading.Tasks.Task.Factory.StartNew(() => { Console.WriteLine("Debugger detected: Press any key to end."); Console.ReadKey(); }).Wait(TimeSpan.FromSeconds(30));
 			}
+
+			return exitcode;
 		}
 
 

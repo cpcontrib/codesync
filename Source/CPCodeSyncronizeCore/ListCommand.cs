@@ -19,7 +19,7 @@ namespace CPCodeSyncronize
 
 		}
 
-		public void Execute()
+		public int Execute()
 		{
 			CodeSyncPackageReader packageReader = new CodeSyncPackageReader(ListOptions.InputFile);
 
@@ -32,6 +32,7 @@ namespace CPCodeSyncronize
 				Console.WriteLine("{0}: {1}", count, relpath);
 			}
 
+			return 0;
 		}
 	}
 }
