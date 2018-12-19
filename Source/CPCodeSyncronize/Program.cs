@@ -8,6 +8,8 @@ using System.IO;
 using System.Xml.Linq;
 using System.Diagnostics;
 
+using CommandLine;
+
 namespace ConsoleApplication1
 {
 	using CPCodeSyncronize.CLI;
@@ -17,50 +19,36 @@ namespace ConsoleApplication1
 
 		static int Main(string[] args)
 		{
-			string invokedVerb = null;
-			object invokedVerbInstance = null;
-
+			ICommand cmd = null;
 			CommonOptions Options = null;
 
-			ParserVerbs verbs = new ParserVerbs();
-			bool optionsParsed = CommandLine.Parser.Default.ParseArguments(args, verbs,
-			  (verb, subOptions) =>
-			  {
-				  // if parsing succeeds the verb name and correct instance
-				  // will be passed to onVerbCommand delegate (string,object)
-				  invokedVerb = verb;
-				  invokedVerbInstance = subOptions;
-				  Options = invokedVerbInstance as CommonOptions;
-			  });
-			
+			int exitcode = CommandLine.Parser.Default.ParseArguments<ExtractOptions, ListOptions>(args)
+			  .MapResult(
+				(ExtractOptions o) => {
+					cmd = new ExtractCommand();
+					cmd.SetOptions(o);
+					Options = o;
+					return 0; },
+				(ListOptions o) => {
+					cmd = new ListCommand();
+					cmd.SetOptions(o);
+					Options = o;
+					return 0; },
+				(errs) => 1
+			  );
+			if(exitcode > 0) return exitcode;
+
+			/*
 			if(optionsParsed == false || (Options.Quiet == false && Options.Porcelain == false))
 			{
 				Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-				Console.WriteLine("cpcodesync v{0} (C)Copyright Lightmaker Inc.", v);
+				Console.Error.WriteLine("cpcodesync v{0} (C)2018", v);
 
-				if(optionsParsed==false)
-				{
-					Console.WriteLine("\tUsage: cpcodesync [verb] [options...]");
-					Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
-				}
+				
 			}
-
-
-			ICommand cmd = null;
-			switch(invokedVerb) 
-			{
-				case "extract":
-					cmd = new ExtractCommand();
-					cmd.SetOptions(invokedVerbInstance);
-					break;
-			}
-
-
-
-			//ScanElementsPath(filename, Options);
-
+			*/
+			
 			//start the command
-			int exitcode = 0;
 			TimeSpan writefilesTimeSpan = Timing.ExecuteTimed(()=> { exitcode = cmd.Execute(); });
 
 			if(Options.Quiet == false && Options.Porcelain == false)

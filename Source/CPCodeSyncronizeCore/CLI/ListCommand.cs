@@ -23,7 +23,9 @@ namespace CPCodeSyncronize.CLI
 		{
 			CodeSyncPackageReader packageReader = new CodeSyncPackageReader(ListOptions.InputFile);
 
-			var relpathList = packageReader.ScanElementsPath();
+			var relpathList = packageReader.ScanElements((e) => 
+				e.GetAttributeValue("Name")
+			);
 
 			int count = 0;
 			foreach(var relpath in relpathList)
