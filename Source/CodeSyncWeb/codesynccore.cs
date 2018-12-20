@@ -30,6 +30,10 @@ namespace CodeSyncWeb
 				S_Provider = new CacheHelper.WebFileCacheKeyProvider("~/App_Data/accessapi-config.json");
 
 			var list = CacheHelper.DeserializeCachedJSON<IList<Models.Instance>>(S_Provider);
+
+			if(list == null)
+				list = new List<Models.Instance>();
+
 			return list;
 		}
 
@@ -61,13 +65,22 @@ namespace CodeSyncWeb
 
 			var instancesDict = instances.ToDictionary(_ => _.Title, StringComparer.OrdinalIgnoreCase);
 
+			if(instancesDict.ContainsKey(instanceConfig.Title)==false)
+			{
+				//add to list for serialization
+				instances.Add(instanceConfig);
+			}
 			instancesDict[instanceConfig.Title] = instanceConfig;
+
+			var sortedList = instances
+				.OrderBy(_ => _.Title, StringComparer.OrdinalIgnoreCase)
+				.ToList();
 
 			string targetPath = S_Provider.GetFilePath();
 			using(var sw = new StreamWriter(File.OpenWrite(targetPath)))
 			{
 				var settings = new JsonSerializerSettings() { Formatting = Formatting.Indented };
-				JsonSerializer.Create(settings).Serialize(sw, instances);
+				JsonSerializer.Create(settings).Serialize(sw, sortedList);
 			}
 
 			return true;
