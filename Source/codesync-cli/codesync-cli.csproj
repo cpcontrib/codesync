@@ -64,9 +64,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CPCodeSyncronizeCore\CPCodeSyncronizeCore.csproj">
+    <ProjectReference Include="..\codesync-core\codesync-core.csproj">
       <Project>{c7375c91-24c8-4744-9fe0-0f77afd30fb0}</Project>
-      <Name>CPCodeSyncronizeCore</Name>
+      <Name>codesync-core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
