@@ -181,6 +181,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="codesynccore.cs" />
     <Compile Include="Components\GlobalExceptionMiddleWare.cs" />
     <Compile Include="Components\OopsExceptionHandler.cs" />
     <Compile Include="Components\ValidateMimeMultipleContentFilterAttribute.cs" />

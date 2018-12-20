@@ -75,6 +75,7 @@ namespace CodeSyncWeb.ApiControllers
 				}
 			}
 
+			//initiate async task to send notification that we received an upload
 			new Task(() =>
 				{
 					try
@@ -103,14 +104,17 @@ namespace CodeSyncWeb.ApiControllers
 			return StatusCode(HttpStatusCode.Accepted);
 		}
 
+
 		[Route("library/{clientLibrary}")]
-		public async Task<HttpResponseMessage> GetLibrary(string clientLibrary)
+		public async Task<HttpResponseMessage> GetLibrary(string clientLibrary, bool refresh = false)
 		{
 			string libraryFile = clientLibrary + ".xml.gz";
 			string libraryFilePath = Path.Combine(S_UploadPath, libraryFile);
 
-			if(File.Exists(libraryFilePath) == false)
-				return Request.CreateResponse(HttpStatusCode.NotFound);
+			if(refresh || File.Exists(libraryFilePath) == false)
+			{
+				var success = codesynccore.RefreshLibrary(clientLibrary);
+			}
 
 			string outType = "application/gzip";
 
