@@ -50,13 +50,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CPCodeSyncronizeCore\CPCodeSyncronizeCore.csproj">
-      <Project>{c7375c91-24c8-4744-9fe0-0f77afd30fb0}</Project>
-      <Name>CPCodeSyncronizeCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CPCodeSyncronize\CPCodeSyncronize.csproj">
+    <ProjectReference Include="..\codesync-cli\codesync-cli.csproj">
       <Project>{88dd3c25-4eb2-4872-9584-f8b84324b506}</Project>
-      <Name>CPCodeSyncronize</Name>
+      <Name>codesync-cli</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\codesync-core\codesync-core.csproj">
+      <Project>{c7375c91-24c8-4744-9fe0-0f77afd30fb0}</Project>
+      <Name>codesync-core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
