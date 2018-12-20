@@ -137,21 +137,27 @@ namespace CPCodeSyncronize.CLI
 			}
 
 			bool writeTally = (Options.Verbose == false && Options.Quiet == false);
-			
-			int count=0;
+
+			int writeCount = 0;
+			int skipCount = 0;
+
 			foreach (var filenode in codeFileElements)
 			{
-				WriteFile(filenode, outputDir, ref existingFiles);
-				count++;
+				bool wroteFile = WriteFile(filenode, outputDir, ref existingFiles);
 
-				if(writeTally) Console.Write("Wrote {0} files\r", count);
+				if(wroteFile)
+					writeCount++;
+				else
+					skipCount++;
+
+				if(writeTally) Console.Write("{0} files\r", writeCount + skipCount);
 			}
 
-			if(writeTally) Console.WriteLine();
+			if(writeTally) Console.WriteLine("Wrote {0} files, Skipped {1} files", writeCount, skipCount);
 		}
 
 
-		void WriteFile(CodeFileNode node, string basepath, ref IDictionary<string,bool> existingFiles)
+		bool WriteFile(CodeFileNode node, string basepath, ref IDictionary<string,bool> existingFiles)
 		{
 			string name = node.Name;
 			string filepath;
@@ -168,6 +174,8 @@ namespace CPCodeSyncronize.CLI
 
 			string fullpath = Path.Combine(basepath, filepath);
 
+			bool wroteFile;
+
 			//check to see if file in filesystem needs updating (do simple size/datetime check)
 			if(ShouldWriteFileContent(node, basepath, fullpath))
 			{
@@ -179,14 +187,17 @@ namespace CPCodeSyncronize.CLI
 					File.SetLastWriteTime(fullpath, lastMod);
 				}
 
-				if(Options.Verbose)
-					Console.WriteLine(" ok  {0}", node.Name);
+				wroteFile = true;
+
+				if(Options.Quiet==false)
+					Console.WriteLine("save {0}", node.Name);
 			}
 			else
 			{
 				if(Options.Verbose)
 					Console.WriteLine("skip {0}", node.Name);
 
+				wroteFile = false;
 			}
 
 			if(existingFiles.ContainsKey(filepath) == false)
@@ -198,7 +209,7 @@ namespace CPCodeSyncronize.CLI
 				existingFiles[filepath] = true;
 			}
 
-
+			return wroteFile;
 		}
 
 		private static byte[] S_EmptyByteArray=new byte[0];
