@@ -106,7 +106,7 @@ namespace CodeSyncWeb.ApiControllers
 
 
 		[Route("library/{clientLibrary}")]
-		public async Task<HttpResponseMessage> GetLibrary(string clientLibrary, bool refresh = false)
+		public async Task<IHttpActionResult> GetLibrary(string clientLibrary, bool refresh = false)
 		{
 			string libraryFile = clientLibrary + ".xml.gz";
 			string libraryFilePath = Path.Combine(S_UploadPath, libraryFile);
@@ -126,6 +126,13 @@ namespace CodeSyncWeb.ApiControllers
 				}
 			}
 
+			if(File.Exists(libraryFilePath) == false)
+			{
+				var respMsg = new HttpResponseMessage(HttpStatusCode.NotFound);
+				respMsg.ReasonPhrase = string.Format("Client library not present.");
+				return ResponseMessage(respMsg);
+			}
+
 			FileStream fs = new FileStream(libraryFilePath, FileMode.Open, FileAccess.Read, FileShare.None);
 			
 			Stream output = fs;
@@ -142,9 +149,7 @@ namespace CodeSyncWeb.ApiControllers
 			//resp.Headers.Add("Content-Type", outType);
 
 			resp.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(outType);
-			return resp;
-			
-
+			return ResponseMessage(resp);
 		}
 
 		private void SendNotificationEmail(string clientLibrary)
