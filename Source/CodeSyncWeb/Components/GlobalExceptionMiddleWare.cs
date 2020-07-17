@@ -13,6 +13,7 @@ namespace CodeSyncWeb.Components
 			: base(next)
 		{ }
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public override async Task Invoke(IOwinContext context)
 		{
 			try
