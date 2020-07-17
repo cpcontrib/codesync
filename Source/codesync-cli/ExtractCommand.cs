@@ -90,6 +90,11 @@ namespace CPCodeSyncronize.CLI
 		{
 			string url = $"https://codesync.cp-contrib.com/api/v1/library/{instance}";
 
+			if(Options.Quiet==false)
+			{
+				Console.WriteLine("Initiate download of instance {0} from codesync.cp-contrib.com...", instance);
+			}
+
 			var response = S_HttpClient.GetAsync(url).ConfigureAwait(false).GetAwaiter().GetResult();
 
 			if (response.IsSuccessStatusCode == false) { tempPathFile = null; return false; }
@@ -100,14 +105,40 @@ namespace CPCodeSyncronize.CLI
 			{
 				System.Threading.Tasks.Task.Run(async () =>
 				{
-					var downloadStream = await response.Content.ReadAsStreamAsync();
-					await downloadStream.CopyToAsync(fs);
+					using (var downloadStream = await response.Content.ReadAsStreamAsync())
+					{
+						byte[] buffer = new byte[64 * 1024]; //64k
+						int bytesRead = 0;
+						int totalBytes = 0;
+
+						do
+						{
+							bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
+							totalBytes += bytesRead;
+
+							if (Options.Quiet == false)
+							{
+								//keep overwriting bytes read info message
+								Console.Write("Read {0} bytes\r", totalBytes);
+							}
+
+							await fs.WriteAsync(buffer, 0, bytesRead);
+
+
+						} while (bytesRead > 0);
+						
+						//skip a line
+						if (Options.Quiet == false) Console.WriteLine();
+
+					}
 				}).Wait();
 			}
 
 			tempPathFile = savePath;
 			return true;
 		}
+
+
 
 		private void DeleteUnused(string basepath, IDictionary<string, bool> existingFiles)
 		{
