@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 
 using System.Net.Http.Formatting;
+using System.Net;
 
 namespace CodeSyncWeb
 {
@@ -22,6 +23,8 @@ namespace CodeSyncWeb
 			GlobalConfiguration.Configure(WebApiConfig.Register);
 			FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 		}
 
 		protected void Application_BeginRequest()
