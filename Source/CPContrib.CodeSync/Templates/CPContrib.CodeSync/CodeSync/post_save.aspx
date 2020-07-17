@@ -36,6 +36,7 @@
 	DateTime beganRunning = DateTime.UtcNow;
 
 	Log.Info("starting");
+	
 
 	try
 	{
@@ -89,11 +90,11 @@
 	//	"/System/Templates/Simple Site CSharp",
 	//	"/System/Templates/Simple Site"
 	//};
-	
+
 
 	public void Initialize(bool LogDebug = false)//would be the ctor
 	{
-		_CodeSyncBaseUri = "http://codesync.cp-contrib.com";
+		_CodeSyncBaseUri = "https://codesync.cp-contrib.com";
 
 		Log = new EmailLogger("CodeSync " + context.ClientName, recipients: "ericnewton76@gmail.com");
 		if(LogDebug) Log.IsDebugEnabled = LogDebug;// asset.Raw["IsDebugEnabled"] == "true";
@@ -353,10 +354,10 @@
 
 		string uploadUrl = _CodeSyncBaseUri + "/api/v1/library/" + context.ClientName + "/upload";
 
-		Log.Debug("posting data to '{0}'.", uploadUrl);
+		Log.Info("Posting data to '{0}'.", uploadUrl);
 		//Util.PostHttp(CodeSyncBaseUri+"/api/upload/library/" + context.ClientName, postHttpParams);
 
-		var wc = new System./**/Net.WebClient();
+		var wc = new WebClientEx() { Timeout = 30000 }; //30000 ms = 5 min max, CP plugin max timeout is 900 seconds
 
 		//wc.Headers.Set("Content-Type", "application/x-gzip");
 		wc.Headers.Set("Content-Type", "application/octet-stream");
@@ -364,5 +365,22 @@
 
 		Log.Info("Data uploaded to '{0}'.", uploadUrl);
 	}
+
+	private class WebClientEx : System./**/Net.WebClient
+	{
+		/// <summary>
+		/// Timeout in milliseconds
+		/// </summary>
+		public int Timeout { get; set; }
+
+		protected override System./**/Net.WebRequest GetWebRequest(Uri uri)
+		{
+			var lWebRequest = base.GetWebRequest(uri);
+			lWebRequest.Timeout = Timeout;
+			((System./**/Net.HttpWebRequest)lWebRequest).ReadWriteTimeout = Timeout;
+			return lWebRequest;
+		}
+	}
+
 
 </script>
