@@ -12,9 +12,12 @@
     <description>CPCodeSync commandline utility</description>
     <!--<releaseNotes>Summary of changes made in this release of the package.</releaseNotes>-->
     <copyright>Copyright 2014</copyright>
-    <tags>CrownPeak cpcodesync</tags>
+    <tags>CrownPeak CP-Contrib codesync</tags>
     <dependencies>
-      <dependency id="CommandLineParser" version="1.9.71" />
+      <!--<dependency id="CommandLineParser" version="2.0.86" />-->
     </dependencies>
   </metadata>
+  <files>
+    <file src="codesync.exe" target="tools" />
+  </files>
 </package>
