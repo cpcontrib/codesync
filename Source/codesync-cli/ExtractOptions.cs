@@ -25,6 +25,9 @@ namespace CPCodeSyncronize.CLI
 		[Option("input-from-web")]
 		public bool InputFromWeb { get; set; }
 
+		[Option("refresh-library")]
+		public bool RefreshLibrary { get; set; }
+
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
 

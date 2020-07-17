@@ -90,9 +90,15 @@ namespace CPCodeSyncronize.CLI
 		{
 			string url = $"https://codesync.cp-contrib.com/api/v1/library/{instance}";
 
+			if(Options.RefreshLibrary == true)
+			{
+				url += "?refresh=true";
+			}
+
 			if(Options.Quiet==false)
 			{
-				Console.WriteLine("Initiate download of instance {0} from codesync.cp-contrib.com...", instance);
+				Console.WriteLine("Download of {0} from codesync.cp-contrib.com...", instance);
+				if (Options.RefreshLibrary == true) Console.WriteLine("Refreshing from source...");
 			}
 
 			var response = S_HttpClient.GetAsync(url).ConfigureAwait(false).GetAwaiter().GetResult();
