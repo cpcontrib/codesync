@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using System.Net.Http;
+
 namespace CPCodeSyncronize.CLI
 {
 
@@ -43,32 +45,68 @@ namespace CPCodeSyncronize.CLI
 
 		public int Execute()
 		{
-			if(executestate < 2) PreExecute();
+			if (executestate < 2) PreExecute();
 
-			if(String.IsNullOrEmpty(state.InputFile))
+			if (Options.InputFromWeb == true && string.IsNullOrEmpty(Options.Instance)==false)
+			{
+				//attempt to download from https://codesync.cp-contrib.com/api/v1/library/{InputFile}
+				string tempPathFile;
+				if (TryDownload(Options.Instance, out tempPathFile) == true)
+				{
+					state.InputFile = tempPathFile;
+				}
+			}
+
+			if (String.IsNullOrEmpty(state.InputFile))
 			{
 				Console.WriteLine("fail InputFile not specified or --Instance option unable to find a file to use.");
 				return 1;
 			}
-			if(File.Exists(state.InputFile) == false)
+
+			if (File.Exists(state.InputFile) == false)
 			{
 				Console.WriteLine("fail InputFile '{0}' doesnt exist.", state.InputFile);
 				return 1;
 			}
 
-			IDictionary<string,bool> existingFiles = ReadExistingFiles(state.FullOutputPath);
+			IDictionary<string, bool> existingFiles = ReadExistingFiles(state.FullOutputPath);
 
-			using(CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile))
+			using (CodeSyncPackageReader packageReader = new CodeSyncPackageReader(state.InputFile))
 			{
 				WriteFiles(packageReader, state.FullOutputPath, ref existingFiles);
 
-				if(Options.Sync)
+				if (Options.Sync)
 				{
 					DeleteUnused(state.FullOutputPath, existingFiles);
 				}
 			}
 
 			return 0;
+		}
+
+		private static HttpClient S_HttpClient = new HttpClient();
+
+		private bool TryDownload(string instance, out string tempPathFile)
+		{
+			string url = $"https://codesync.cp-contrib.com/api/v1/library/{instance}";
+
+			var response = S_HttpClient.GetAsync(url).ConfigureAwait(false).GetAwaiter().GetResult();
+
+			if (response.IsSuccessStatusCode == false) { tempPathFile = null; return false; }
+
+			string savePath = Path.Combine(Environment.GetEnvironmentVariable("TEMP"), instance);
+
+			using (var fs = File.Create(savePath))
+			{
+				System.Threading.Tasks.Task.Run(async () =>
+				{
+					var downloadStream = await response.Content.ReadAsStreamAsync();
+					await downloadStream.CopyToAsync(fs);
+				}).Wait();
+			}
+
+			tempPathFile = savePath;
+			return true;
 		}
 
 		private void DeleteUnused(string basepath, IDictionary<string, bool> existingFiles)

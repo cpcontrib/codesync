@@ -22,6 +22,9 @@ namespace CPCodeSyncronize.CLI
 		[Option('s', "scratch")]
 		public bool Scratch { get; set; }
 
+		[Option("input-from-web")]
+		public bool InputFromWeb { get; set; }
+
 		//[ValueList(typeof(string))]
 		//public IList<string> Values { get; set; }
 

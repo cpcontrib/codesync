@@ -60,7 +60,7 @@ namespace CPCodeSyncronize.CLI
 		{
 			if(string.IsNullOrEmpty(Options.InputFile) == false)
 			{
-				string fullUri = Options.InputFile;// "http://dev-retailnationalgrid.nationalgridaccess.com/codelibrary.xml";
+				string fullUri = Options.InputFile;
 
 				string filename;
 				if(fullUri.StartsWith("http://") || fullUri.StartsWith("https://"))
