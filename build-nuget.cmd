@@ -29,25 +29,30 @@ echo %BUILD_VERSION% >%BUILDPATH%\LastBuildVersion
 msbuild %SOURCEPATH%\codesync-cli\codesync-cli.csproj /p:Configuration=Release /p:OutputPath=%BUILDPATH%\Release
 if errorlevel 1 goto :ERROR
 
+ECHO.
+ECHO Clean output directory
+rmdir %BUILDPATH%\Nuget 2>NUL
+mkdir %BUILDPATH%\Nuget 2>NUL
+if errorlevel 1 goto :ERROR
+
 :MERGE
 ECHO.
 ECHO Performing merge:
-mkdir %BUILDPATH%\NugetPack 2>NUL
 if errorlevel 1 goto :ERROR
 
 cd %BUILDPATH%\Release
 if errorlevel 1 goto :ERROR
 
 echo.
-ECHO ILMerge /out:%BUILDPATH%\Nugetpack\codesync.exe codesync.exe CommandLine.dll codesync-core.dll
-%ILMERGE_EXE% /out:%BUILDPATH%\Nugetpack\codesync.exe codesync.exe CommandLine.dll codesync-core.dll
+ECHO ILMerge /out:%BUILDPATH%\Nuget\codesync.exe codesync.exe CommandLine.dll codesync-core.dll
+%ILMERGE_EXE% /out:%BUILDPATH%\Nuget\codesync.exe codesync.exe CommandLine.dll codesync-core.dll
 if errorlevel 1 goto :ERROR
 ECHO ILMerge successful
 
 :NUGET_PACKAGE
 ECHO.
 ECHO Building Nuget Package:
-pushd %BUILDPATH%\NugetPack
+pushd %BUILDPATH%\Nuget
 copy %~dp0\CPCodeSync.CommandLine.nuspec .
 if errorlevel 1 goto :ERROR
 
@@ -58,7 +63,7 @@ popd
 :NUGET_UPLOAD
 ECHO.
 ECHO Uploading Nuget package:
-pushd %BUILDPATH%\NugetPack
+pushd %BUILDPATH%\Nuget
 REM %NUGET_EXE% push CPCodeSync.CommandLine.%BUILD_VERSION%.nupkg -verbosity detailed
 if errorlevel 1 goto :ERROR
 popd

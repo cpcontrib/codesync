@@ -1,0 +1,14 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+image: Visual Studio 2019
+shallow_clone: true
+build:
+  verbosity: minimal
+before_package:
+- cmd: build-nuget.cmd
+artifacts:
+- path: NugetPackage/*.nupkg
+  name: NugetPackage
+on_failure:
+- cmd: tree /f /a
