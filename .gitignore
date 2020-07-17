@@ -185,3 +185,4 @@ FakesAssemblies/
 **/.vs/
 **/App_Data/Logs/*
 Source/ConsoleApplication1 
+**/accessapi-config.json 
