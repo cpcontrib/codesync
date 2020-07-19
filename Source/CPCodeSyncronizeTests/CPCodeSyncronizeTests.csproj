@@ -34,7 +34,6 @@
   <ItemGroup>
     <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.XML" />
@@ -47,9 +46,6 @@
     <Compile Include="CodeSyncPackageReader_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\codesync-cli\codesync-cli.csproj">
       <Project>{88dd3c25-4eb2-4872-9584-f8b84324b506}</Project>
       <Name>codesync-cli</Name>
@@ -58,6 +54,9 @@
       <Project>{c7375c91-24c8-4744-9fe0-0f77afd30fb0}</Project>
       <Name>codesync-core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
